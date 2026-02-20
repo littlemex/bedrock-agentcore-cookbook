@@ -1,0 +1,15 @@
+# AWS SDK
+boto3>=1.35.0
+
+# JWT handling for Cognito
+pyjwt>=2.9.0
+cryptography>=41.0.0
+
+# HTTP requests
+requests>=2.32.0
+
+# Date/time handling
+python-dateutil>=2.9.0
+
+# JSON handling
+simplejson>=3.19.0

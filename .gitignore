@@ -1,0 +1,35 @@
+# Python
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# AWS
+*.pem
+*.key
+.aws/
+
+# Config files with sensitive data
+*-config.json
+gateway-config.json
+phase5-config.json
+
+# Logs
+*.log
+*.out
+*.err
+
+# Temporary files
+*.tmp
+.DS_Store

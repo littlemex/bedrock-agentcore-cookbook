@@ -1,0 +1,25 @@
+{
+  "gatewayId": "YOUR_GATEWAY_ID",
+  "gatewayArn": "arn:aws:bedrock-agentcore:us-east-1:ACCOUNT_ID:gateway/GATEWAY_ID",
+  "gatewayStatus": "READY",
+  "targetId": "YOUR_TARGET_ID",
+  "targetName": "mcp-target",
+  "cognitoUserPoolId": "us-east-1_XXXXXXXXX",
+  "cognitoAppClientId": "XXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "cognitoUserPoolArn": "arn:aws:cognito-idp:us-east-1:ACCOUNT_ID:userpool/us-east-1_XXXXXXXXX",
+  "policyEngineId": "YOUR_POLICY_ENGINE_ID",
+  "policyEngineArn": "arn:aws:bedrock-agentcore:us-east-1:ACCOUNT_ID:policy-engine/POLICY_ENGINE_ID",
+  "policyEngineMode": "LOG_ONLY",
+  "registeredPolicies": [
+    {
+      "policyId": "admin_policy-XXXXXXXXXX",
+      "policyName": "admin_policy",
+      "status": "REGISTERED"
+    },
+    {
+      "policyId": "user_policy-XXXXXXXXXX",
+      "policyName": "user_policy",
+      "status": "REGISTERED"
+    }
+  ]
+}

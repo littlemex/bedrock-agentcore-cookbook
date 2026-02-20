@@ -1,0 +1,14 @@
+// User ロール: 特定ツール（retrieve_doc, list_tools）のみ許可
+// action in [...] で複数ツールを明示的に列挙する
+permit (
+  principal is AgentCore::OAuthUser,
+  action in [
+    AgentCore::Action::"mcp-target___retrieve_doc",
+    AgentCore::Action::"mcp-target___list_tools"
+  ],
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:776010787911:gateway/e2e-phase3-gateway-sytqnigmll"
+)
+when {
+  principal.hasTag("role") &&
+  principal.getTag("role") == "user"
+};
