@@ -27,7 +27,10 @@ bedrock-agentcore-cookbook/
     ├── 02-iam-abac/            # IAM ABAC の実装パターン
     ├── 03-gateway/             # Gateway のデプロイと設定
     ├── 04-policy-engine/       # Policy Engine + Cedar Policy
-    └── 05-end-to-end/          # 全コンポーネントの E2E 統合テスト
+    ├── 05-end-to-end/          # 全コンポーネントの E2E 統合テスト
+    ├── 06-response-interceptor/ # Response Interceptor (RBAC ツールフィルタリング)
+    ├── 07-request-interceptor/  # Request Interceptor (RBAC ツール認可)
+    └── 08-outbound-auth/        # Outbound Auth (OAuth2/API Key)
 ```
 
 ## 前提条件
@@ -113,6 +116,43 @@ python test-phase5.py
 
 詳細: [examples/05-end-to-end/README.md](examples/05-end-to-end/README.md)
 
+### 6. Response Interceptor
+
+Gateway の Response Interceptor を使用して、MCP サーバーのレスポンスを RBAC でフィルタリングします。
+
+```bash
+cd examples/06-response-interceptor
+python3 verify-response-interceptor.py        # ローカル検証
+python3 deploy-response-interceptor.py        # Lambda デプロイ + Gateway 設定
+python3 verify-response-interceptor.py --remote  # リモート検証
+```
+
+詳細: [examples/06-response-interceptor/README.md](examples/06-response-interceptor/README.md)
+
+### 7. Request Interceptor
+
+Gateway の Request Interceptor を使用して、MCP サーバーへのリクエストを RBAC で認可します。
+
+```bash
+cd examples/07-request-interceptor
+python3 verify-request-interceptor.py        # ローカル検証
+python3 deploy-request-interceptor.py        # Lambda デプロイ + Gateway 設定
+python3 verify-request-interceptor.py --remote  # リモート検証
+```
+
+詳細: [examples/07-request-interceptor/README.md](examples/07-request-interceptor/README.md)
+
+### 8. Outbound Auth
+
+Gateway の Outbound Auth 機能を使用して、外部サービスへの認証情報を管理します。
+
+```bash
+cd examples/08-outbound-auth
+python3 verify-outbound-auth.py
+```
+
+詳細: [examples/08-outbound-auth/README.md](examples/08-outbound-auth/README.md)
+
 ## 重要な発見事項
 
 このリポジトリの例は、実際の E2E 検証を通じて得られた知見に基づいています。主な発見事項：
@@ -187,11 +227,16 @@ cd ../04-policy-engine
 
 以下の項目は、現時点では未検証です：
 
-- `PartiallyAuthorizeActions` API での実動作確認
+- `PartiallyAuthorizeActions` API での実動作確認（boto3/AWS CLI 未サポート）
 - Policy Engine mode=ENFORCE での動作確認
-- Response Interceptor の E2E 統合
-- Request Interceptor の E2E 統合
-- Gateway Outbound Auth の実動作
+
+### 検証済み項目（Phase 7 で追加）
+
+以下の項目は、2026-02-21 の Phase 7 検証で確認済みです：
+
+- Response Interceptor: Lambda デプロイ + Gateway 設定 + リモート呼び出し（7 PASS local / 4 PASS remote）
+- Request Interceptor: Lambda デプロイ + Gateway 設定 + リモート呼び出し（11 PASS local / 4 PASS remote）
+- Gateway Outbound Auth: OAuth2 (25 ベンダー) + API Key の CRUD（9 PASS / 0 FAIL）
 
 ### AWS リージョン
 
