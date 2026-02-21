@@ -33,3 +33,15 @@ phase5-config.json
 # Temporary files
 *.tmp
 .DS_Store
+
+# Large model files
+*.pt
+*.pth
+*.safetensors
+*.bin
+*.onnx
+tokenizer.json
+
+# Build outputs
+cdk.out/
+node_modules/
