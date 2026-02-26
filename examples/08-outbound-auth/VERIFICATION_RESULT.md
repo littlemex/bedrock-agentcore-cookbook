@@ -81,7 +81,7 @@
 ### 作成された ARN
 
 ```
-arn: aws: bedrock-agentcore: us-east-1:776010787911: token-vault/default/oauth2credentialprovider/e2e-test-outbound-auth-provider
+arn: aws: bedrock-agentcore: us-east-1:123456789012: token-vault/default/oauth2credentialprovider/e2e-test-outbound-auth-provider
 ```
 
 ### ARN 構造の分析
@@ -106,7 +106,7 @@ arn: aws: bedrock-agentcore: {region}: {account}: token-vault/default/oauth2cred
 ### 作成された ARN
 
 ```
-arn: aws: bedrock-agentcore: us-east-1:776010787911: token-vault/default/apikeycredentialprovider/e2e-test-api-key-provider
+arn: aws: bedrock-agentcore: us-east-1:123456789012: token-vault/default/apikeycredentialprovider/e2e-test-api-key-provider
 ```
 
 ### ARN 構造の分析

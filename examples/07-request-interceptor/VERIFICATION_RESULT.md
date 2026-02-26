@@ -23,7 +23,7 @@ Gateway ID: e2e-phase3-gateway-sytqnigmll
 | 項目 | 値 |
 |------|---|
 | 関数名 | `e2e-request-interceptor` |
-| ARN | `arn: aws: lambda: us-east-1:776010787911: function: e2e-request-interceptor` |
+| ARN | `arn: aws: lambda: us-east-1:123456789012: function: e2e-request-interceptor` |
 | ランタイム | Python 3.12 |
 | IAM ロール | `e2e-request-interceptor-role` |
 | Gateway 呼び出し権限 | 設定済み |
@@ -130,8 +130,8 @@ AWS 公式サンプル (interceptor-request.py) の `_deny_request()` 関数で�
 
 | リソース | 種別 | ARN/ID |
 |---------|------|--------|
-| Lambda | Function | `arn: aws: lambda: us-east-1:776010787911: function: e2e-request-interceptor` |
-| IAM Role | Role | `arn: aws: iam::776010787911: role/e2e-request-interceptor-role` |
+| Lambda | Function | `arn: aws: lambda: us-east-1:123456789012: function: e2e-request-interceptor` |
+| IAM Role | Role | `arn: aws: iam::123456789012: role/e2e-request-interceptor-role` |
 | Gateway | AgentCore Gateway | `e2e-phase3-gateway-sytqnigmll` |
 
 ---

@@ -14,11 +14,11 @@
 
 | 項目 | 値 |
 |------|-----|
-| AWS Account ID | 776010787911 |
+| AWS Account ID | 123456789012 |
 | Region | us-east-1 |
 | Memory ID | `e2e_phase5_memory_tenant_a-U3FzdrBpdk` |
 | Strategy ID | `tenant_a_strategy-PlAJRCC34W` |
-| Memory ARN | `arn: aws: bedrock-agentcore: us-east-1:776010787911: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk` |
+| Memory ARN | `arn: aws: bedrock-agentcore: us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk` |
 
 ## 検証方法
 
@@ -46,7 +46,7 @@
       "bedrock-agentcore: ListMemoryRecords",
       "bedrock-agentcore: ListActors"
     ],
-    "Resource": "arn: aws: bedrock-agentcore: us-east-1:776010787911: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk",
+    "Resource": "arn: aws: bedrock-agentcore: us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk",
     "Condition": {
       "StringEquals": {
         "bedrock-agentcore: actorId": "actor-alice"
@@ -71,9 +71,9 @@
 
 ```
 An error occurred (AccessDeniedException) when calling the BatchCreateMemoryRecords operation:
-User: arn: aws: sts::776010787911: assumed-role/e2e-actorid-test-role-with-condition/actorid-test-1
+User: arn: aws: sts::123456789012: assumed-role/e2e-actorid-test-role-with-condition/actorid-test-1
 is not authorized to perform: bedrock-agentcore: BatchCreateMemoryRecords
-on resource: arn: aws: bedrock-agentcore: us-east-1:776010787911: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk
+on resource: arn: aws: bedrock-agentcore: us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk
 because no identity-based policy allows the bedrock-agentcore: BatchCreateMemoryRecords action
 ```
 

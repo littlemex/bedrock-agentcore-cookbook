@@ -23,7 +23,7 @@ Gateway ID: e2e-phase3-gateway-sytqnigmll
 | 項目 | 値 |
 |------|---|
 | 関数名 | `e2e-response-interceptor` |
-| ARN | `arn: aws: lambda: us-east-1:776010787911: function: e2e-response-interceptor` |
+| ARN | `arn: aws: lambda: us-east-1:123456789012: function: e2e-response-interceptor` |
 | ランタイム | Python 3.12 |
 | IAM ロール | `e2e-response-interceptor-role` |
 | Gateway 呼び出し権限 | 設定済み (`bedrock-agentcore.amazonaws.com`) |
@@ -91,7 +91,7 @@ interceptorConfigurations 確認:
     {
       "interceptor": {
         "lambda": {
-          "arn": "arn: aws: lambda: us-east-1:776010787911: function: e2e-response-interceptor"
+          "arn": "arn: aws: lambda: us-east-1:123456789012: function: e2e-response-interceptor"
         }
       },
       "interceptionPoints": ["RESPONSE"]
@@ -132,8 +132,8 @@ Response Interceptor のイベントには `gatewayRequest` と `gatewayResponse
 
 | リソース | 種別 | ARN/ID |
 |---------|------|--------|
-| Lambda | Function | `arn: aws: lambda: us-east-1:776010787911: function: e2e-response-interceptor` |
-| IAM Role | Role | `arn: aws: iam::776010787911: role/e2e-response-interceptor-role` |
+| Lambda | Function | `arn: aws: lambda: us-east-1:123456789012: function: e2e-response-interceptor` |
+| IAM Role | Role | `arn: aws: iam::123456789012: role/e2e-response-interceptor-role` |
 | Gateway | AgentCore Gateway | `e2e-phase3-gateway-sytqnigmll` |
 
 ---

@@ -2,11 +2,11 @@
   "verdict": "BLOCKED",
   "timestamp": "2026-02-21T15:41:30.706429+00:00",
   "config": {
-    "accountId": "776010787911",
+    "accountId": "123456789012",
     "region": "us-east-1",
     "memoryId": "e2e_phase5_memory_tenant_a-U3FzdrBpdk",
     "strategyId": "tenant_a_strategy-PlAJRCC34W",
-    "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk",
+    "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk",
     "allowedActorId": "actor-alice",
     "deniedActorId": "actor-bob"
   },
@@ -15,7 +15,7 @@
       "name": "1: With Condition + Match (BatchCreate)",
       "result": {
         "success": false,
-        "error": "An error occurred (AccessDeniedException) when calling the BatchCreateMemoryRecords operation: User: arn:aws:sts::776010787911:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-1 is not authorized to perform: bedrock-agentcore:BatchCreateMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:BatchCreateMemoryRecords action",
+        "error": "An error occurred (AccessDeniedException) when calling the BatchCreateMemoryRecords operation: User: arn:aws:sts::123456789012:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-1 is not authorized to perform: bedrock-agentcore:BatchCreateMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:BatchCreateMemoryRecords action",
         "errorCode": "AccessDeniedException",
         "api": "BatchCreateMemoryRecords"
       }
@@ -24,7 +24,7 @@
       "name": "2: With Condition + Mismatch (BatchCreate)",
       "result": {
         "success": false,
-        "error": "An error occurred (AccessDeniedException) when calling the BatchCreateMemoryRecords operation: User: arn:aws:sts::776010787911:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-2 is not authorized to perform: bedrock-agentcore:BatchCreateMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:BatchCreateMemoryRecords action",
+        "error": "An error occurred (AccessDeniedException) when calling the BatchCreateMemoryRecords operation: User: arn:aws:sts::123456789012:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-2 is not authorized to perform: bedrock-agentcore:BatchCreateMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:BatchCreateMemoryRecords action",
         "errorCode": "AccessDeniedException",
         "api": "BatchCreateMemoryRecords"
       }
@@ -41,7 +41,7 @@
       "name": "4: With Condition + Match (Retrieve)",
       "result": {
         "success": false,
-        "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::776010787911:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-4 is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action",
+        "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::123456789012:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-4 is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action",
         "errorCode": "AccessDeniedException",
         "api": "RetrieveMemoryRecords"
       }
@@ -50,7 +50,7 @@
       "name": "5: With Condition + Mismatch (Retrieve)",
       "result": {
         "success": false,
-        "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::776010787911:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-5 is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action",
+        "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::123456789012:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-5 is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action",
         "errorCode": "AccessDeniedException",
         "api": "RetrieveMemoryRecords"
       }
@@ -59,7 +59,7 @@
       "name": "6: With Condition + ListActors",
       "result": {
         "success": false,
-        "error": "An error occurred (AccessDeniedException) when calling the ListActors operation: User: arn:aws:sts::776010787911:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-6 is not authorized to perform: bedrock-agentcore:ListActors on resource: arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:ListActors action",
+        "error": "An error occurred (AccessDeniedException) when calling the ListActors operation: User: arn:aws:sts::123456789012:assumed-role/e2e-actorid-test-role-with-condition/actorid-test-6 is not authorized to perform: bedrock-agentcore:ListActors on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:ListActors action",
         "errorCode": "AccessDeniedException",
         "api": "ListActors"
       }

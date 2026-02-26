@@ -3,7 +3,7 @@
 ## 検証概要
 
 - 検証日時: 2026-02-20 14:40:07 UTC
-- AWS アカウント: 776010787911
+- AWS アカウント: 123456789012
 - リージョン: us-east-1
 - Memory ID: `e2e_phase5_memory-6e1B3NETF1`
 - Strategy: `default_strategy-fuoTkC9l1r`
@@ -83,7 +83,7 @@
 ::::details Raw Data
 ```json
 {
-  "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::776010787911:assumed-role/e2e-phase5-tenant-a-role/test-cross-tenant-a-to-b is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_b-BgKrkM6fzP because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action"
+  "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::123456789012:assumed-role/e2e-phase5-tenant-a-role/test-cross-tenant-a-to-b is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_b-BgKrkM6fzP because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action"
 }
 ```
 ::::
@@ -96,7 +96,7 @@
 ::::details Raw Data
 ```json
 {
-  "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::776010787911:assumed-role/e2e-phase5-tenant-b-role/test-cross-tenant-b-to-a is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:776010787911:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action"
+  "error": "An error occurred (AccessDeniedException) when calling the RetrieveMemoryRecords operation: User: arn:aws:sts::123456789012:assumed-role/e2e-phase5-tenant-b-role/test-cross-tenant-b-to-a is not authorized to perform: bedrock-agentcore:RetrieveMemoryRecords on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk because no identity-based policy allows the bedrock-agentcore:RetrieveMemoryRecords action"
 }
 ```
 ::::
@@ -109,7 +109,7 @@
 ::::details Raw Data
 ```json
 {
-  "error": "An error occurred (AccessDenied) when calling the AssumeRole operation: User: arn:aws:sts::776010787911:assumed-role/TorchNeuron-CDK-CodeServerInstanceRole116EB19E-5wIyL9BeuShu/i-0049acfde6046f237 is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::776010787911:role/e2e-phase5-tenant-a-role"
+  "error": "An error occurred (AccessDenied) when calling the AssumeRole operation: User: arn:aws:sts::123456789012:assumed-role/TorchNeuron-CDK-CodeServerInstanceRole116EB19E-5wIyL9BeuShu/i-0049acfde6046f237 is not authorized to perform: sts:AssumeRole on resource: arn:aws:iam::123456789012:role/e2e-phase5-tenant-a-role"
 }
 ```
 ::::

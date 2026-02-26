@@ -16,11 +16,11 @@ Task #91 (M-2 → CRITICAL): Cedar Policy の E2E 検証
 | リソース | ID/ARN | ステータス |
 |---------|--------|----------|
 | Gateway | `e2e-phase3-gateway-sytqnigmll` | READY |
-| Gateway ARN | `arn: aws: bedrock-agentcore: us-east-1:776010787911: gateway/e2e-phase3-gateway-sytqnigmll` | - |
+| Gateway ARN | `arn: aws: bedrock-agentcore: us-east-1:123456789012: gateway/e2e-phase3-gateway-sytqnigmll` | - |
 | Lambda Target | `UTF91MVZVT` | ACTIVE |
 | Lambda Function | `e2e-phase3-mcp-server` | Active |
 | Policy Engine | `e2e_phase3_policy_engine-80kx42tcle` | ACTIVE |
-| Policy Engine ARN | `arn: aws: bedrock-agentcore: us-east-1:776010787911: policy-engine/e2e_phase3_policy_engine-80kx42tcle` | - |
+| Policy Engine ARN | `arn: aws: bedrock-agentcore: us-east-1:123456789012: policy-engine/e2e_phase3_policy_engine-80kx42tcle` | - |
 | Policy Engine Mode | LOG_ONLY | - |
 
 ### Cedar ポリシー
@@ -71,7 +71,7 @@ permit (
     AgentCore::Action::"mcp-target___retrieve_doc",
     AgentCore::Action::"mcp-target___list_tools"
   ],
-  resource == AgentCore::Gateway::"arn: aws: bedrock-agentcore: us-east-1:776010787911: gateway/e2e-phase3-gateway-sytqnigmll"
+  resource == AgentCore::Gateway::"arn: aws: bedrock-agentcore: us-east-1:123456789012: gateway/e2e-phase3-gateway-sytqnigmll"
 )
 when {
   principal.hasTag("role") &&
