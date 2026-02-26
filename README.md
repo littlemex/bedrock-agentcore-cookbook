@@ -30,7 +30,9 @@ bedrock-agentcore-cookbook/
     ├── 05-end-to-end/          # 全コンポーネントの E2E 統合テスト
     ├── 06-response-interceptor/ # Response Interceptor (RBAC ツールフィルタリング)
     ├── 07-request-interceptor/  # Request Interceptor (RBAC ツール認可)
-    └── 08-outbound-auth/        # Outbound Auth (OAuth2/API Key)
+    ├── 08-outbound-auth/        # Outbound Auth (OAuth2/API Key)
+    ├── 09-e2e-auth-test/        # E2E 認証認可テスト (Lambda Authorizer + Cedar + ABAC)
+    └── 10-auth-cookbook/         # 認証認可実装サンプル (Lambda, Interceptor, Cedar, IAM)
 ```
 
 ## 前提条件
@@ -152,6 +154,34 @@ python3 verify-outbound-auth.py
 ```
 
 詳細: [examples/08-outbound-auth/README.md](examples/08-outbound-auth/README.md)
+
+
+### 9. E2E 認証認可テスト
+
+AgentCore Gateway の認証認可実装の E2E 検証を実行します。Lambda Authorizer, Cedar Policy Engine, Gateway Interceptor, IAM ABAC の 4 層 Defense in Depth を実際の AWS 環境にデプロイして検証します。
+
+```bash
+cd examples/09-e2e-auth-test
+./run-e2e-verification.sh us-east-1 my-test-project
+```
+
+詳細: [examples/09-e2e-auth-test/README.md](examples/09-e2e-auth-test/README.md)
+
+### 10. 認証認可実装サンプル (Auth Cookbook)
+
+AgentCore Gateway の認証認可実装の完全なサンプルコードを提供します。Lambda Authorizer, Request/Response Interceptor, Pre Token Generation Lambda, IAM ポリシー, Cedar ポリシーが含まれています。
+
+```bash
+cd examples/10-auth-cookbook
+# Lambda Authorizer のデプロイ
+cd lambda-authorizer
+zip authorizer_basic.zip authorizer_basic.py
+aws lambda update-function-code \
+  --function-name your-authorizer-function \
+  --zip-file fileb://authorizer_basic.zip
+```
+
+詳細: [examples/10-auth-cookbook/README.md](examples/10-auth-cookbook/README.md)
 
 ## 重要な発見事項
 

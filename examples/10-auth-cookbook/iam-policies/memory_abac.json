@@ -1,0 +1,31 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowMemoryAccessSameTenant",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:RetrieveMemoryRecords",
+        "bedrock-agentcore:BatchCreateMemoryRecords",
+        "bedrock-agentcore:BatchDeleteMemoryRecords"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "bedrock-agentcore:namespace": "${aws:PrincipalTag/tenant_id}"
+        }
+      }
+    },
+    {
+      "Sid": "DenyCrossTenantMemoryAccess",
+      "Effect": "Deny",
+      "Action": "bedrock-agentcore:*",
+      "Resource": "*",
+      "Condition": {
+        "StringNotEquals": {
+          "bedrock-agentcore:namespace": "${aws:PrincipalTag/tenant_id}"
+        }
+      }
+    }
+  ]
+}
