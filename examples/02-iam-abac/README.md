@@ -11,6 +11,7 @@ IAM ABAC を使用すると、リソースタグと IAM プリンシパルタグ
 - `setup-iam-roles.py` - ABAC 用 IAM Role とポリシーのセットアップ
 - `test-h1-condition-key.py` - `bedrock-agentcore:namespace` Condition Key の検証（Create/Retrieve）
 - `test-write-operations-abac.py` - Write 操作（Delete/Update）の完全検証（NEW）
+- `test-namespace-security.py` - namespace セキュリティ検証（StringLike/StringEquals）（NEW）
 - `test-actorId-condition-key.py` - `bedrock-agentcore:actorId` Condition Key の検証
 - `H1_VERIFICATION_RESULT.md` - H-1 検証結果レポート（namespace）
 - `ACTORID_VERIFICATION_RESULT.md` - actorId Condition Key 検証結果レポート
@@ -101,6 +102,48 @@ python test-write-operations-abac.py
 
 **Test 5: tenant-a で自 Records 削除（クリーンアップ）**
 - tenant-a は自分の Records を削除できることを確認
+
+前提条件:
+- Memory リソースが作成済み（`setup-memory.py`）
+- phase5-config.json が存在する
+
+5. namespace セキュリティ検証（NEW）
+
+```bash
+python test-namespace-security.py
+```
+
+このスクリプトは、`bedrock-agentcore:namespace` Condition Key のセキュリティ挙動を包括的に検証します。
+
+**Test Suite 1: パストラバーサル攻撃（StringLike）**
+- `/tenant-a/../tenant-b/` での Record 作成試行
+- URL エンコードされた `%2F..%2F` での攻撃試行
+- すべて拒否されることを確認
+
+**Test Suite 2: 空 namespace（StringLike）**
+- 空文字列 `""` での Record 作成試行
+- ルートパス `/` での Record 作成試行
+- すべて拒否されることを確認
+
+**Test Suite 3: プレフィックス攻撃（StringLike）**
+- `/tenant-abc/` での Record 作成試行（`/tenant-a/*` にマッチしないことを確認）
+- `/tenant-a-test/` での Record 作成試行
+- すべて拒否されることを確認
+
+**Test Suite 4: 正常な namespace（StringLike）**
+- `/tenant-a/user-001/` での Record 作成
+- `/tenant-a/user-002/sub/` でのサブパス作成
+- すべて成功することを確認
+
+**Test Suite 5: StringEquals 完全一致検証**
+- `/tenant-a/user-001/` での完全一致（成功）
+- `/tenant-a/user-001/sub/` でのサブパス試行（拒否、ワイルドカードなし）
+- StringEquals と StringLike の挙動差異を確認
+
+**重要な検証ポイント**:
+- StringLike: ワイルドカード（`*`）をサポート、パスマッチングが可能
+- StringEquals: 完全一致のみ、ワイルドカード不可
+- セキュリティ攻撃（パストラバーサル、プレフィックス攻撃）が正しく拒否されるか
 
 前提条件:
 - Memory リソースが作成済み（`setup-memory.py`）
