@@ -11,6 +11,8 @@ Policy Engine は、Cedar Policy 言語を使用して、Gateway へのアクセ
 - `create-policy-engine.py` - Policy Engine の作成
 - `associate-policy-engine.py` - Policy Engine を Gateway に関連付け
 - `put-cedar-policies.py` - Cedar Policy の登録
+- `update-policy-engine-mode.py` - Policy Engine モードの切り替え（LOG_ONLY/ENFORCE）（NEW）
+- `test-enforce-mode.py` - ENFORCE モード E2E 検証スクリプト（NEW）
 - `policies/admin-policy.cedar` - Admin ロール用ポリシー
 - `policies/user-policy.cedar` - User ロール用ポリシー
 - `E2E_PHASE3_VERIFICATION_RESULT.md` - E2E 検証結果レポート
@@ -93,6 +95,35 @@ python test-partially-authorize.py
 - role=admin ユーザーが全てのツールにアクセス可能であること
 - role=user ユーザーが特定のツール（retrieve_doc, list_tools）のみアクセス可能であること
 - Cedar Policy が期待通りに動作していること
+
+7. Policy Engine モードの切り替え（NEW）
+
+```bash
+# 現在のモードを確認
+python update-policy-engine-mode.py --get-mode
+
+# LOG_ONLY モードに設定
+python update-policy-engine-mode.py --mode LOG_ONLY
+
+# ENFORCE モードに設定
+python update-policy-engine-mode.py --mode ENFORCE
+```
+
+8. ENFORCE モード E2E 検証（NEW）
+
+```bash
+python test-enforce-mode.py
+```
+
+このスクリプトは、以下を検証します：
+
+- LOG_ONLY モード: 全アクセスが許可される（ポリシー評価はログのみ）
+- ENFORCE モードへの切り替え
+- ENFORCE モード: Cedar Policy に基づいて実際にアクセス制御が行われる
+  - role=admin: 全ツールへのアクセスが許可される
+  - role=user: 制限されたツールのみアクセス可能
+  - ポリシーにマッチしないリクエストは拒否される
+- LOG_ONLY モードへの復元（クリーンアップ）
 
 ## Cedar Policy の例
 
@@ -242,12 +273,14 @@ E2E 検証の詳細は `E2E_PHASE3_VERIFICATION_RESULT.md` を参照してくだ
 - [OK] Cedar ポリシーの登録（2 件）
 - [OK] hasTag()/getTag() 構文の Policy Engine での検証
 - [OK] resource 制約の要件確認
+- [OK] Policy Engine mode=ENFORCE での動作確認（NEW）
+- [OK] LOG_ONLY → ENFORCE モード切り替えの検証（NEW）
+- [OK] ENFORCE モードでのアクセス拒否の検証（NEW）
 
 ### 未検証項目
 
 - [PENDING] PartiallyAuthorizeActions API での実動作確認
 - [PENDING] role=admin と role=user での tool list 表示差異の検証
-- [PENDING] Policy Engine mode=ENFORCE での動作確認
 
 ## 参考資料
 
