@@ -291,7 +291,7 @@ def assume_role(sts_client, role_arn: str, session_name: str, external_id: str) 
         return None
 
 
-def create_memory_client(credentials: dict) -> any:
+def create_memory_client(credentials: dict) -> Any:
     """一時クレデンシャルを使用して Memory API クライアントを作成する"""
     return boto3.client(
         "bedrock-agentcore-control",

@@ -35,7 +35,7 @@ def get_existing_memory_id():
             with open(CONFIG_FILE, "r") as f:
                 config = json.load(f)
             return config.get("memory", {}).get("memoryId")
-        except:
+        except Exception:
             return None
     return None
 
