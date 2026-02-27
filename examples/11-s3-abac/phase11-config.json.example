@@ -1,0 +1,34 @@
+{
+  "accountId": "123456789012",
+  "region": "us-east-1",
+  "bucket": {
+    "bucketName": "s3-abac-example-789012",
+    "bucketArn": "arn:aws:s3:::s3-abac-example-789012"
+  },
+  "tenantA": {
+    "tenantId": "tenant-a",
+    "objects": [
+      "data/tenant-a/report.txt",
+      "data/tenant-a/invoice.csv"
+    ]
+  },
+  "tenantB": {
+    "tenantId": "tenant-b",
+    "objects": [
+      "data/tenant-b/report.txt",
+      "data/tenant-b/invoice.csv"
+    ]
+  },
+  "roles": {
+    "tenantA": {
+      "roleName": "s3-abac-tenant-a-role",
+      "roleArn": "arn:aws:iam::123456789012:role/s3-abac-tenant-a-role",
+      "tenantId": "tenant-a"
+    },
+    "tenantB": {
+      "roleName": "s3-abac-tenant-b-role",
+      "roleArn": "arn:aws:iam::123456789012:role/s3-abac-tenant-b-role",
+      "tenantId": "tenant-b"
+    }
+  }
+}

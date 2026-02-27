@@ -1,0 +1,5 @@
+{
+  "table_name": "AuthPolicyTable",
+  "region": "us-east-1",
+  "description": "AuthPolicyTable configuration for Phase 13 - Pre Token Generation Lambda"
+}

@@ -14,7 +14,9 @@ Policy Engine は、Cedar Policy 言語を使用して、Gateway へのアクセ
 - `update-policy-engine-mode.py` - Policy Engine モードの切り替え（LOG_ONLY/ENFORCE）（NEW）
 - `test-enforce-mode.py` - ENFORCE モード E2E 検証スクリプト（NEW）
 - `policies/admin-policy.cedar` - Admin ロール用ポリシー
+- `policies/power-user-policy.cedar` - Power-user ロール用ポリシー（NEW）
 - `policies/user-policy.cedar` - User ロール用ポリシー
+- `test-power-user-policy.py` - Power-user ポリシー検証スクリプト（NEW）
 - `E2E_PHASE3_VERIFICATION_RESULT.md` - E2E 検証結果レポート
 
 ## Cedar Policy の基本
@@ -80,6 +82,7 @@ python setup-cognito-users.py
 このスクリプトは、PartiallyAuthorizeActions API のテスト用に以下のユーザーを作成します：
 
 - `admin-test-user` (role=admin)
+- `power-user-test-user` (role=power-user)
 - `user-test-user` (role=user)
 
 **注意**: User Pool にカスタム属性 `custom: role` が定義されている必要があります。
@@ -93,6 +96,8 @@ python test-partially-authorize.py
 このスクリプトは、以下を検証します：
 
 - role=admin ユーザーが全てのツールにアクセス可能であること
+- role=power-user ユーザーが複数ツール（read_file, list_directory, brave_web_search）にアクセス可能であること
+- role=power-user ユーザーが delete_file にアクセス不可であること
 - role=user ユーザーが特定のツール（retrieve_doc, list_tools）のみアクセス可能であること
 - Cedar Policy が期待通りに動作していること
 
@@ -149,6 +154,52 @@ when {
 - **action**: すべてのアクション（ワイルドカード）
 - **resource is AgentCore::Gateway**: Gateway リソース（最低限の制約）
 - **when**: principal のタグに `role=admin` が含まれる場合
+
+### Power-user ロール: 複数ツール許可 + 特定ツール拒否
+
+`policies/power-user-policy.cedar`:
+
+```cedar
+// 許可: read_file, list_directory, brave_web_search
+permit (
+  principal is AgentCore::OAuthUser,
+  action in [
+    AgentCore::Action::"mcp-target___read_file",
+    AgentCore::Action::"mcp-target___list_directory",
+    AgentCore::Action::"mcp-target___brave_web_search"
+  ],
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:ACCOUNT_ID:gateway/GATEWAY_ID"
+)
+when {
+  principal.hasTag("role") &&
+  principal.getTag("role") == "power-user"
+};
+
+// 拒否: delete_file（forbid は permit より優先される）
+forbid (
+  principal is AgentCore::OAuthUser,
+  action in [
+    AgentCore::Action::"mcp-target___delete_file"
+  ],
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:ACCOUNT_ID:gateway/GATEWAY_ID"
+)
+when {
+  principal.hasTag("role") &&
+  principal.getTag("role") == "power-user"
+};
+```
+
+このポリシーは以下を意味します：
+
+- **permit + action in [...]**: 複数の特定ツールを許可（Admin と User の中間的な権限）
+- **forbid**: `delete_file` を明示的に拒否（`forbid` は `permit` より常に優先される）
+- **when**: principal のタグに `role=power-user` が含まれる場合
+
+Power-user ポリシーの検証：
+
+```bash
+python3 test-power-user-policy.py
+```
 
 ### User ロール: 特定ツールのみ許可
 
@@ -276,6 +327,7 @@ E2E 検証の詳細は `E2E_PHASE3_VERIFICATION_RESULT.md` を参照してくだ
 - [OK] Policy Engine mode=ENFORCE での動作確認（NEW）
 - [OK] LOG_ONLY → ENFORCE モード切り替えの検証（NEW）
 - [OK] ENFORCE モードでのアクセス拒否の検証（NEW）
+- [PENDING] Power-user ロールポリシーの E2E 検証（NEW）
 
 ### 未検証項目
 

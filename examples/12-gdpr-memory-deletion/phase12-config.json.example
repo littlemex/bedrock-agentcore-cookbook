@@ -1,0 +1,24 @@
+{
+  "accountId": "123456789012",
+  "region": "us-east-1",
+  "memory": {
+    "memoryId": "mem-xxxxxxxxxx",
+    "memoryName": "my_memory",
+    "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/mem-xxxxxxxxxx",
+    "strategyId": "str-xxxxxxxxxx",
+    "strategyName": "default_strategy"
+  },
+  "gdprProcessor": {
+    "roleName": "gdpr-memory-processor-role",
+    "roleArn": "arn:aws:iam::123456789012:role/gdpr-memory-processor-role"
+  },
+  "cloudtrail": {
+    "enabled": true,
+    "logGroupName": "/aws/cloudtrail/gdpr-memory-deletion"
+  },
+  "gdpr": {
+    "dataRetentionDays": 30,
+    "batchSize": 100,
+    "auditReportDir": "./audit-reports"
+  }
+}

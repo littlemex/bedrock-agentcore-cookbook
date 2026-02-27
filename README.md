@@ -32,7 +32,10 @@ bedrock-agentcore-cookbook/
     ├── 07-request-interceptor/  # Request Interceptor (RBAC ツール認可)
     ├── 08-outbound-auth/        # Outbound Auth (OAuth2/API Key)
     ├── 09-e2e-auth-test/        # E2E 認証認可テスト (Lambda Authorizer + Cedar + ABAC)
-    └── 10-auth-cookbook/         # 認証認可実装サンプル (Lambda, Interceptor, Cedar, IAM)
+    ├── 10-auth-cookbook/        # 認証認可実装サンプル (Lambda, Interceptor, Cedar, IAM)
+    ├── 11-s3-abac/              # S3 オブジェクトタグベースの ABAC パターン
+    ├── 12-gdpr-memory-deletion/ # GDPR Right to Erasure 対応記憶削除ワークフロー
+    └── 13-auth-policy-table/    # Pre Token Generation Lambda 用 DynamoDB 認証テーブル
 ```
 
 ## 前提条件
@@ -182,6 +185,45 @@ aws lambda update-function-code \
 ```
 
 詳細: [examples/10-auth-cookbook/README.md](examples/10-auth-cookbook/README.md)
+
+### 11. S3 オブジェクトタグベースの ABAC
+
+S3 オブジェクトタグ (`s3:ExistingObjectTag/tenant_id`) と STS セッションタグ (`aws:PrincipalTag/tenant_id`) を照合する ABAC パターンを実装します。マルチテナント環境での S3 アクセス制御に有効です。
+
+```bash
+cd examples/11-s3-abac
+python3 setup-s3-buckets.py
+python3 setup-iam-roles.py
+python3 test-s3-abac.py
+```
+
+詳細: [examples/11-s3-abac/README.md](examples/11-s3-abac/README.md)
+
+### 12. GDPR Right to Erasure 対応記憶削除ワークフロー
+
+GDPR「忘れられる権利」に対応した、長期記憶の手動削除ワークフローを実装します。BatchDeleteMemoryRecords API によるバッチ削除、監査ログ、CloudTrail 照合を含みます。
+
+```bash
+cd examples/12-gdpr-memory-deletion
+python3 setup-gdpr-processor-role.py
+python3 gdpr-delete-user-memories.py --actor-id tenant-a:user-001
+python3 gdpr-audit-report.py
+```
+
+詳細: [examples/12-gdpr-memory-deletion/README.md](examples/12-gdpr-memory-deletion/README.md)
+
+### 13. DynamoDB 認証ポリシーテーブル
+
+Pre Token Generation Lambda で使用する認証ポリシーテーブルのリファレンス実装です。Email Primary Key + TenantId GSI の設計パターンを提供します。
+
+```bash
+cd examples/13-auth-policy-table
+python3 setup-dynamodb-table.py
+python3 seed-test-users.py
+python3 query-user-policy.py --email admin@tenant-a.example.com
+```
+
+詳細: [examples/13-auth-policy-table/README.md](examples/13-auth-policy-table/README.md)
 
 ## 重要な発見事項
 
