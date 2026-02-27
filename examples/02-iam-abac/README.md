@@ -9,8 +9,9 @@ IAM ABAC を使用すると、リソースタグと IAM プリンシパルタグ
 ## ファイル構成
 
 - `setup-iam-roles.py` - ABAC 用 IAM Role とポリシーのセットアップ
-- `test-h1-condition-key.py` - `bedrock-agentcore: namespace` Condition Key の検証
-- `test-actorId-condition-key.py` - `bedrock-agentcore: actorId` Condition Key の検証
+- `test-h1-condition-key.py` - `bedrock-agentcore:namespace` Condition Key の検証（Create/Retrieve）
+- `test-write-operations-abac.py` - Write 操作（Delete/Update）の完全検証（NEW）
+- `test-actorId-condition-key.py` - `bedrock-agentcore:actorId` Condition Key の検証
 - `H1_VERIFICATION_RESULT.md` - H-1 検証結果レポート（namespace）
 - `ACTORID_VERIFICATION_RESULT.md` - actorId Condition Key 検証結果レポート
 - `VERIFICATION_RESULT.md` - 全体的な検証結果レポート
@@ -65,13 +66,45 @@ python setup-iam-roles.py
 - ABAC 用 IAM Role
 - Condition Key を使用した IAM Policy
 
-3. Condition Key の検証
+3. Condition Key の検証（Create/Retrieve）
 
 ```bash
 python test-h1-condition-key.py
 ```
 
-このスクリプトは、`bedrock-agentcore: namespace` Condition Key が正常に動作するかを検証します。
+このスクリプトは、`bedrock-agentcore:namespace` Condition Key が Create/Retrieve 操作で正常に動作するかを検証します。
+
+4. Write 操作の完全検証（NEW）
+
+```bash
+python test-write-operations-abac.py
+```
+
+このスクリプトは以下を検証します：
+
+**Test 1: テストロールのセットアップ**
+- tenant-a 用ロール作成（namespace: /tenant-a/*）
+- tenant-b 用ロール作成（namespace: /tenant-b/*）
+- IAM ポリシー伝播待機（10 秒）
+
+**Test 2: DeleteMemoryRecord の Cross-Tenant アクセス拒否**
+- tenant-b で tenant-a の Record 削除試行
+- AccessDeniedException が返されることを確認
+
+**Test 3: BatchDeleteMemoryRecords の Cross-Tenant アクセス拒否**
+- tenant-b で tenant-a の Records バッチ削除試行
+- AccessDeniedException が返されることを確認
+
+**Test 4: BatchUpdateMemoryRecords の Cross-Tenant アクセス拒否**
+- tenant-b で tenant-a の Record 更新試行
+- AccessDeniedException が返されることを確認
+
+**Test 5: tenant-a で自 Records 削除（クリーンアップ）**
+- tenant-a は自分の Records を削除できることを確認
+
+前提条件:
+- Memory リソースが作成済み（`setup-memory.py`）
+- phase5-config.json が存在する
 
 ## 検証結果
 
