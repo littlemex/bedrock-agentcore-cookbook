@@ -75,7 +75,7 @@ python test-phase5.py
 
 - namespace=tenant-a でタグ付けされた Memory へのアクセス
 - namespace=tenant-b でタグ付けされた Memory へのアクセス（拒否を期待）
-- `bedrock-agentcore: namespace` Condition Key の検証
+- `bedrock-agentcore:namespace` Condition Key の検証
 
 ### 2. Gateway + Policy Engine
 

@@ -19,13 +19,13 @@ AgentCore Gateway は、MCP（Model Context Protocol）サーバーやカスタ�
 
 - AWS CLI 設定済み（`aws configure`）
 - AWS アカウントに以下の権限
-  - `bedrock-agentcore: CreateGateway`
-  - `bedrock-agentcore: GetGateway`
-  - `bedrock-agentcore: DeleteGateway`
-  - `bedrock-agentcore: CreateGatewayTarget`
-  - `iam: CreateRole`
-  - `iam: PassRole`
-  - `lambda: InvokeFunction`
+  - `bedrock-agentcore:CreateGateway`
+  - `bedrock-agentcore:GetGateway`
+  - `bedrock-agentcore:DeleteGateway`
+  - `bedrock-agentcore:CreateGatewayTarget`
+  - `iam:CreateRole`
+  - `iam:PassRole`
+  - `lambda:InvokeFunction`
 
 - Cognito User Pool（JWT Authorizer を使用する場合）
 - Lambda 関数（MCP サーバーまたはカスタムツール）
@@ -219,7 +219,7 @@ Gateway が Lambda を呼び出すためには、IAM Role の Trust Policy に�
           "bedrock-agentcore.amazonaws.com"
         ]
       },
-      "Action": "sts: AssumeRole"
+      "Action": "sts:AssumeRole"
     }
   ]
 }
@@ -233,12 +233,12 @@ Gateway が Lambda を呼び出すためには、IAM Role の Trust Policy に�
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": "lambda: InvokeFunction",
-      "Resource": "arn: aws: lambda: REGION: ACCOUNT: function/FUNCTION_NAME"
+      "Action": "lambda:InvokeFunction",
+      "Resource": "arn:aws:lambda:REGION: ACCOUNT:function/FUNCTION_NAME"
     },
     {
       "Effect": "Allow",
-      "Action": "bedrock-agentcore: *",
+      "Action": "bedrock-agentcore:*",
       "Resource": "*"
     }
   ]

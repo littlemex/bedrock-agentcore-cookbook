@@ -30,10 +30,10 @@ Cedar は、AWS が開発したポリシー言語で、以下の要素で構成�
 
 - AWS CLI 設定済み（`aws configure`）
 - AWS アカウントに以下の権限
-  - `bedrock-agentcore: CreatePolicyEngine`
-  - `bedrock-agentcore: GetPolicyEngine`
-  - `bedrock-agentcore: CreatePolicy`
-  - `bedrock-agentcore: UpdateGateway`
+  - `bedrock-agentcore:CreatePolicyEngine`
+  - `bedrock-agentcore:GetPolicyEngine`
+  - `bedrock-agentcore:CreatePolicy`
+  - `bedrock-agentcore:UpdateGateway`
 - Gateway がデプロイ済み（`03-gateway` を参照）
 
 ## セットアップ
@@ -161,7 +161,7 @@ permit (
     AgentCore::Action::"mcp-target___retrieve_doc",
     AgentCore::Action::"mcp-target___list_tools"
   ],
-  resource == AgentCore::Gateway::"arn: aws: bedrock-agentcore: us-east-1: ACCOUNT_ID: gateway/GATEWAY_ID"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1: ACCOUNT_ID: gateway/GATEWAY_ID"
 )
 when {
   principal.hasTag("role") &&
@@ -196,7 +196,7 @@ Policy 名も同様に `^[A-Za-z][A-Za-z0-9_]*$` に従う必要があります�
 Cedar Policy では、resource にワイルドカード（`resource` のみ）を使用できません。最低でも以下のいずれかが必要です：
 
 - **Admin ポリシー（全ツール許可）**: `resource is AgentCore::Gateway`
-- **Tool-specific ポリシー**: `resource == AgentCore::Gateway::"arn: aws: bedrock-agentcore: ..."`
+- **Tool-specific ポリシー**: `resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:..."`
 
 ### 4. hasTag() / getTag() 構文
 
