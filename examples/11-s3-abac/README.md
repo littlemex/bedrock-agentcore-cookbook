@@ -40,6 +40,17 @@
 └─────────────────────────────────────────┘
 ```
 
+## E2E テスト
+
+全ステップを自動で実行し、結果を `VERIFICATION_RESULT.md` に出力する:
+
+```bash
+./run-e2e-test.sh
+```
+
+テスト結果は JSON 形式で `VERIFICATION_RESULT.md` に記録される。
+結果テンプレートは `examples/VERIFICATION_RESULT.md.template` を参照。
+
 ## セットアップ手順
 
 ### 1. S3 バケット作成
@@ -76,6 +87,24 @@ python3 test-s3-abac.py
 - **Test 2**: Tenant B が自身のオブジェクトにアクセス成功
 - **Test 3**: Tenant A が Tenant B のオブジェクトにアクセス拒否
 - **Test 4**: Tenant B が Tenant A のオブジェクトにアクセス拒否
+
+## E2E テスト
+
+`run-e2e-test.sh` スクリプトを使用して、セットアップからテストまでを一括で実行できます。
+
+```bash
+bash run-e2e-test.sh
+```
+
+このスクリプトは以下を順番に実行します:
+
+1. S3 バケットとオブジェクトタグのセットアップ (`setup-s3-buckets.py`)
+2. IAM ロールの作成 (`setup-iam-roles.py`)
+3. S3 ABAC テストの実行 (`test-s3-abac.py`)
+
+テスト結果は標準出力に表示されます。全テストが PASS であれば正常です。
+
+詳細な E2E テスト手順は [E2E_TEST_GUIDE.md](../../E2E_TEST_GUIDE.md) を参照してください。
 
 ## クリーンアップ
 

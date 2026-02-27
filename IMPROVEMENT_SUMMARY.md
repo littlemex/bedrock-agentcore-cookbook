@@ -73,7 +73,33 @@
   - 削除証明レポート生成機能
 - テナント分離された GDPR Processor ロール設計の改善
 
-### 3. Zenn book 注記・パターン追加（HIGH 対応）
+### 3. E2E テストスクリプト作成
+
+**対象**: `examples/11-s3-abac/`, `examples/12-gdpr-memory-deletion/`, `examples/13-auth-policy-table/`
+
+- 各 Example に `run-e2e-test.sh` を作成（セットアップ→テスト→検証を一括実行）
+- テスト実行手順書 [E2E_TEST_GUIDE.md](E2E_TEST_GUIDE.md) を作成
+- CI/CD（GitHub Actions）への統合方法を記載
+
+### 4. パフォーマンスベンチマーク実装
+
+**対象**: `examples/14-performance-benchmark/`
+
+- 各コンポーネント（Cedar Policy Engine, Memory API, DynamoDB, Lambda）のベンチマークスクリプトを作成
+- パフォーマンスベースライン [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) を作成
+- 4 層 Defense in Depth の合計レイテンシー期待値を文書化
+
+### 5. ResourceTag ABAC 検証スクリプト作成
+
+**対象**: `examples/15-memory-resource-tag-abac/`
+
+- Memory リソースに対する `aws:ResourceTag/tenant_id` Condition Key の動作検証スクリプトを作成
+- Memory 作成 + タグ付与 (`setup-memory-with-tags.py`)
+- ResourceTag ABAC IAM ロール作成 (`setup-iam-roles-with-resource-tag.py`)
+- 5 つのテストケース実行 (`test-resource-tag-abac.py`): 同一テナントアクセス成功、クロステナントアクセス拒否、Null Condition 検証
+- `aws:ResourceTag` が Memory API で動作しない場合の代替案（namespace ABAC, テナント別 Memory）を文書化
+
+### 6. Zenn book 注記・パターン追加（HIGH 対応）
 
 **対象**: Zenn book 各章
 
@@ -89,22 +115,31 @@
 
 以下の項目は、実環境での AWS リソースデプロイ・検証が必要なため、本レビューサイクルでは対応していません。
 
-### E2E テスト未実施（実環境必要）
+### E2E テスト
 
-| 項目 | 理由 | 推奨対応時期 |
-|------|------|-------------|
-| Example 03 Gateway 全検証 | AWS Gateway デプロイが必要 | 次回デプロイサイクル |
-| Example 06/07 Gateway 経由 E2E 検証 | Gateway + Interceptor 統合が必要 | 次回デプロイサイクル |
-| Cognito Client Secret Lifecycle 検証 | Cognito User Pool 操作が必要 | 次回デプロイサイクル |
-| Policy Engine ENFORCE モード検証 | Policy Engine デプロイが必要 | 次回デプロイサイクル |
+| 項目 | 状況 | 備考 |
+|------|------|------|
+| Example 11-13 E2E テストスクリプト | [対応済み] スクリプト作成完了 | `run-e2e-test.sh` を配置。詳細は [E2E_TEST_GUIDE.md](E2E_TEST_GUIDE.md) |
+| Example 15 ResourceTag ABAC 検証 | [対応済み] スクリプト作成完了 | examples/15-memory-resource-tag-abac に配置。`aws:ResourceTag/tenant_id` の動作検証 |
+| Example 03 Gateway 全検証 | [未対応] 実環境が必要 | AWS Gateway デプロイが必要 |
+| Example 06/07 Gateway 経由 E2E 検証 | [未対応] 実環境が必要 | Gateway + Interceptor 統合が必要 |
+| Cognito Client Secret Lifecycle 検証 | [未対応] 実環境が必要 | Cognito User Pool 操作が必要 |
+| Policy Engine ENFORCE モード検証 | [未対応] 実環境が必要 | Policy Engine デプロイが必要 |
 
-### パフォーマンス測定未実施
+### パフォーマンス測定
 
-| 項目 | 理由 | 推奨対応時期 |
-|------|------|-------------|
-| 3 手法アクセス制御のレイテンシー比較 | 実環境 Gateway が必要 | パフォーマンステストフェーズ |
-| 4 層 Defense in Depth のオーバーヘッド測定 | 全層デプロイが必要 | パフォーマンステストフェーズ |
-| Lambda コールドスタート影響測定 | 実 Lambda 環境が必要 | パフォーマンステストフェーズ |
+| 項目 | 状況 | 備考 |
+|------|------|------|
+| パフォーマンスベンチマーク実装 | [対応済み] スクリプト作成完了 | examples/14-performance-benchmark に配置。ベースライン値は [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) |
+| 3 手法アクセス制御のレイテンシー比較 | [未対応] 実環境が必要 | 実環境 Gateway が必要 |
+| 4 層 Defense in Depth のオーバーヘッド測定 | [未対応] 実環境が必要 | 全層デプロイが必要 |
+| Lambda コールドスタート影響測定 | [未対応] 実環境が必要 | 実 Lambda 環境が必要 |
+
+### カスタムヘッダー伝播
+
+| 項目 | 状況 | 備考 |
+|------|------|------|
+| カスタムヘッダー伝播の検証 | [未対応] 実環境が必要 | 実環境の Gateway が必要。Gateway 経由でのカスタムヘッダー透過テストは未実施 |
 
 ### コード修正推奨（未着手）
 
@@ -137,6 +172,7 @@
 | テナント別 Memory + Resource ARN 制限 | PASS (8 テスト) | 推奨 |
 | External ID Trust Policy | PASS | 推奨 |
 | STS SessionTags ABAC | FAIL (SCP 制限) | 環境依存 |
+| Memory ResourceTag ABAC (`aws:ResourceTag/tenant_id`) | スクリプト準備完了 | examples/15 で検証予定 |
 | Cross-Tenant Deny ポリシー | 条件付き | Null バイパスリスクあり |
 
 ---
@@ -148,18 +184,20 @@
 1. Gateway 経由の E2E テスト実行（examples/03, 06, 07）
 2. Cognito Client Secret Lifecycle Management 検証追加（examples/08, 09）
 3. authorizer_saas.py の JWT 検証バグ修正（examples/10）
+4. examples/11-13 の E2E テストスクリプトを実環境で実行
 
 ### 中期（1-2 週間）
 
-4. Policy Engine ENFORCE モード検証
-5. セキュリティバイパスシナリオの体系的テスト追加
-6. パフォーマンスベンチマーク実施
+5. Policy Engine ENFORCE モード検証
+6. セキュリティバイパスシナリオの体系的テスト追加
+7. examples/14 のパフォーマンスベンチマークを実環境で実行し、ベースライン値を検証
+8. カスタムヘッダー伝播の検証（実環境 Gateway 必要）
 
 ### 長期（月次メンテナンス）
 
-7. boto3 更新に伴う PartiallyAuthorizeActions API サポート確認
-8. Cedar GA 後の ENFORCE モード移行計画策定
-9. 全 example の HIGH/MEDIUM 検証ギャップ段階的解消
+9. boto3 更新に伴う PartiallyAuthorizeActions API サポート確認
+10. Cedar GA 後の ENFORCE モード移行計画策定
+11. 全 example の HIGH/MEDIUM 検証ギャップ段階的解消
 
 ---
 

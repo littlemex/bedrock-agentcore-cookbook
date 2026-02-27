@@ -1,0 +1,21 @@
+{
+  "region": "us-east-1",
+  "gatewayId": "gw-xxxxxxxxxxxx",
+  "policyEngineId": "pe-xxxxxxxxxxxx",
+  "cognitoUserPoolId": "us-east-1_XXXXXXXXX",
+  "cognitoAppClientId": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "memoryId": "mem-xxxxxxxxxxxx",
+  "tableName": "AuthPolicyTable",
+  "interceptorFunctionName": "e2e-request-interceptor",
+  "testUsers": {
+    "admin": {
+      "username": "admin@tenant-a.example.com",
+      "password": "TempPass123!"
+    },
+    "user": {
+      "username": "user@tenant-a.example.com",
+      "password": "TempPass123!"
+    }
+  },
+  "description": "Phase 14 Performance Benchmark configuration"
+}

@@ -1,0 +1,40 @@
+{
+  "accountId": "123456789012",
+  "region": "us-east-1",
+  "memoryA": {
+    "memoryId": "mem-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "memoryName": "resource_tag_abac_tenant_a",
+    "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/mem-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "strategyId": "strategy-xxxxxxxx",
+    "strategyName": "default_strategy",
+    "tenantId": "tenant-a"
+  },
+  "memoryB": {
+    "memoryId": "mem-yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy",
+    "memoryName": "resource_tag_abac_tenant_b",
+    "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/mem-yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy",
+    "strategyId": "strategy-yyyyyyyy",
+    "strategyName": "default_strategy",
+    "tenantId": "tenant-b"
+  },
+  "memoryNoTag": {
+    "memoryId": "mem-zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+    "memoryName": "resource_tag_abac_no_tag",
+    "memoryArn": "arn:aws:bedrock-agentcore:us-east-1:123456789012:memory/mem-zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz",
+    "strategyId": "strategy-zzzzzzzz",
+    "strategyName": "default_strategy",
+    "tenantId": null
+  },
+  "roles": {
+    "tenantA": {
+      "roleName": "memory-restag-abac-tenant-a-role",
+      "roleArn": "arn:aws:iam::123456789012:role/memory-restag-abac-tenant-a-role",
+      "tenantId": "tenant-a"
+    },
+    "tenantB": {
+      "roleName": "memory-restag-abac-tenant-b-role",
+      "roleArn": "arn:aws:iam::123456789012:role/memory-restag-abac-tenant-b-role",
+      "tenantId": "tenant-b"
+    }
+  }
+}

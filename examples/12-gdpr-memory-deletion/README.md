@@ -17,6 +17,23 @@ AgentCore Memory レコードの手動削除ワークフローを実装するサ
 3. **監査証跡**: 全削除操作を JSON 監査ログとして記録。CloudTrail ログとの照合も可能
 4. **Dry-Run サポート**: 実際に削除せずに対象レコードを確認可能
 
+## E2E テスト
+
+全ステップを自動で実行し、結果を `VERIFICATION_RESULT.md` に出力する:
+
+```bash
+./run-e2e-test.sh
+```
+
+テスト対象の actor_id を指定する場合:
+
+```bash
+./run-e2e-test.sh tenant-a:user-001
+```
+
+テスト結果は JSON 形式で `VERIFICATION_RESULT.md` に記録される。
+結果テンプレートは `examples/VERIFICATION_RESULT.md.template` を参照。
+
 ## ファイル構成
 
 | ファイル | 説明 |
@@ -25,6 +42,7 @@ AgentCore Memory レコードの手動削除ワークフローを実装するサ
 | `gdpr-delete-user-memories.py` | ユーザー記憶バッチ削除スクリプト（削除後検証付き） |
 | `gdpr-generate-deletion-certificate.py` | 削除証明書生成（JSON 形式） |
 | `gdpr-audit-report.py` | 削除監査レポート生成（Markdown 形式） |
+| `run-e2e-test.sh` | E2E テストスクリプト (全ステップ自動実行) |
 | `phase12-config.json.example` | 設定ファイルテンプレート |
 
 ## 前提条件
@@ -125,6 +143,25 @@ python3 gdpr-audit-report.py --actor-id tenant-a:user-001
 # CloudTrail 検索をスキップ
 python3 gdpr-audit-report.py --skip-cloudtrail
 ```
+
+## E2E テスト
+
+`run-e2e-test.sh` スクリプトを使用して、セットアップからテスト、監査レポート生成までを一括で実行できます。
+
+```bash
+bash run-e2e-test.sh
+```
+
+このスクリプトは以下を順番に実行します:
+
+1. GDPR Processor ロールの作成 (`setup-gdpr-processor-role.py`)
+2. ユーザー記憶の削除（Dry-Run + 実行） (`gdpr-delete-user-memories.py`)
+3. 削除後の残存レコード検証
+4. 監査レポート生成 (`gdpr-audit-report.py`)
+
+テスト結果は標準出力に表示されます。削除後の残存レコードが 0 件であれば正常です。
+
+詳細な E2E テスト手順は [E2E_TEST_GUIDE.md](../../E2E_TEST_GUIDE.md) を参照してください。
 
 ## IAM ポリシー設計
 

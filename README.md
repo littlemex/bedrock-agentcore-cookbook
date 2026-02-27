@@ -21,6 +21,9 @@ AWS Bedrock AgentCore は、AI エージェントの開発を簡素化するた�
 bedrock-agentcore-cookbook/
 ├── README.md                   # このファイル
 ├── requirements.txt            # 共通の Python 依存パッケージ
+├── E2E_TEST_GUIDE.md           # E2E テスト実行ガイド
+├── PERFORMANCE_BASELINE.md     # パフォーマンスベースライン
+├── IMPROVEMENT_SUMMARY.md      # レビュー結果と改善サマリー
 ├── .gitignore
 └── examples/
     ├── 01-memory-api/          # Memory API の基本的な使い方
@@ -35,7 +38,9 @@ bedrock-agentcore-cookbook/
     ├── 10-auth-cookbook/        # 認証認可実装サンプル (Lambda, Interceptor, Cedar, IAM)
     ├── 11-s3-abac/              # S3 オブジェクトタグベースの ABAC パターン
     ├── 12-gdpr-memory-deletion/ # GDPR Right to Erasure 対応記憶削除ワークフロー
-    └── 13-auth-policy-table/    # Pre Token Generation Lambda 用 DynamoDB 認証テーブル
+    ├── 13-auth-policy-table/    # Pre Token Generation Lambda 用 DynamoDB 認証テーブル
+    ├── 14-performance-benchmark/ # パフォーマンスベンチマーク測定
+    └── 15-memory-resource-tag-abac/ # Memory ResourceTag ABAC (aws:ResourceTag/tenant_id)
 ```
 
 ## 前提条件
@@ -225,6 +230,35 @@ python3 query-user-policy.py --email admin@tenant-a.example.com
 
 詳細: [examples/13-auth-policy-table/README.md](examples/13-auth-policy-table/README.md)
 
+### 14. パフォーマンスベンチマーク
+
+各コンポーネントのレイテンシーとスループットを測定します。
+
+```bash
+cd examples/14-performance-benchmark
+# 詳細は examples/14-performance-benchmark/README.md を参照
+```
+
+詳細: [examples/14-performance-benchmark/README.md](examples/14-performance-benchmark/README.md)
+
+### 15. Memory ResourceTag ABAC
+
+Memory リソースに対する `aws:ResourceTag/tenant_id` Condition Key の動作を検証します。S3 ABAC（Example 11）と同様のパターンを Memory API に適用し、リソースタグベースのマルチテナント分離を実現します。
+
+```bash
+cd examples/15-memory-resource-tag-abac
+python3 setup-memory-with-tags.py
+python3 setup-iam-roles-with-resource-tag.py
+python3 test-resource-tag-abac.py
+```
+
+詳細: [examples/15-memory-resource-tag-abac/README.md](examples/15-memory-resource-tag-abac/README.md)
+
+## E2E テストと パフォーマンス測定
+
+- **E2E テストガイド**: [E2E_TEST_GUIDE.md](E2E_TEST_GUIDE.md) -- 全 Example の E2E テスト実行手順
+- **パフォーマンスベースライン**: [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) -- 各コンポーネントの期待パフォーマンス指標
+
 ## セキュリティレビュー結果（2026-02-27）
 
 本 cookbook および関連する Zenn book に対してセキュリティレビューを実施しました。詳細は [IMPROVEMENT_SUMMARY.md](IMPROVEMENT_SUMMARY.md) を参照してください。
@@ -242,15 +276,18 @@ python3 query-user-policy.py --email admin@tenant-a.example.com
 - Zenn book のセキュリティコード修正（JWT 署名検証、GDPR テナント分離、Cedar LOG_ONLY 注記）
 - GDPR 削除ワークフローの完全性検証フロー追加（examples/12）
 - テナント ID バリデーション、ログ出力セキュリティの注記強化
+- E2E テストスクリプト作成（examples/11-13）-- [E2E_TEST_GUIDE.md](E2E_TEST_GUIDE.md) を参照
+- パフォーマンスベンチマーク実装（examples/14）-- [PERFORMANCE_BASELINE.md](PERFORMANCE_BASELINE.md) を参照
+- ResourceTag ABAC 検証スクリプト作成（examples/15）-- `aws:ResourceTag/tenant_id` の Memory API での動作検証
 
 ### 未対応項目（実環境必要）
 
 - Gateway 経由の E2E テスト（examples/03, 06, 07）
 - Cognito Client Secret Lifecycle Management 検証（examples/08, 09, 10）
 - Policy Engine ENFORCE モード検証（examples/04）
-- パフォーマンス測定（レイテンシー比較、コールドスタート影響）
+- カスタムヘッダー伝播の検証（実環境の Gateway が必要）
 
-Examples 11-13 は Zenn book のコード検証を目的として作成されましたが、実環境での E2E テストは未実施です。各 example の README.md に検証状況の注記があります。
+E2E テストスクリプトは examples/11-13 に `run-e2e-test.sh` として準備済みです。実行手順は [E2E_TEST_GUIDE.md](E2E_TEST_GUIDE.md) を参照してください。
 
 ---
 

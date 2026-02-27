@@ -44,6 +44,23 @@ DynamoDB から取得し、カスタムクレームとして注入するため�
 1. **Email によるユーザーポリシー取得** (GetItem) - Pre Token Generation Lambda のメインクエリ
 2. **テナント ID によるユーザー一覧取得** (Query on TenantIdIndex) - テナント管理用
 
+## E2E テスト
+
+全ステップを自動で実行し、結果を `VERIFICATION_RESULT.md` に出力する:
+
+```bash
+./run-e2e-test.sh
+```
+
+リージョンを指定する場合:
+
+```bash
+./run-e2e-test.sh --region us-west-2
+```
+
+テスト結果は JSON 形式で `VERIFICATION_RESULT.md` に記録される。
+結果テンプレートは `examples/VERIFICATION_RESULT.md.template` を参照。
+
 ## ファイル構成
 
 ```
@@ -51,7 +68,9 @@ examples/13-auth-policy-table/
   setup-dynamodb-table.py      # テーブル作成スクリプト
   seed-test-users.py           # テストユーザーデータ投入
   query-user-policy.py         # ユーザーポリシー取得 (検証用)
+  run-e2e-test.sh              # E2E テストスクリプト (全ステップ自動実行)
   phase13-config.json.example  # 設定ファイルテンプレート
+  VERIFICATION_RESULT.md       # テスト結果 (run-e2e-test.sh が自動生成)
   README.md                    # このファイル
 ```
 
@@ -122,6 +141,26 @@ python3 query-user-policy.py --email admin@tenant-a.example.com --json
 | `user@tenant-a.example.com` | tenant-a | user | developers, viewers | code-review, documentation, testing |
 | `admin@tenant-b.example.com` | tenant-b | admin | administrators, developers, viewers | `*` (全許可) |
 | `readonly@tenant-b.example.com` | tenant-b | readonly | viewers | documentation |
+
+## E2E テスト
+
+`run-e2e-test.sh` スクリプトを使用して、テーブル作成からデータ投入、クエリ検証までを一括で実行できます。
+
+```bash
+bash run-e2e-test.sh
+```
+
+このスクリプトは以下を順番に実行します:
+
+1. DynamoDB テーブル作成 (`setup-dynamodb-table.py`)
+2. テストデータ投入 (`seed-test-users.py`)
+3. Email による GetItem クエリ検証 (`query-user-policy.py --email ...`)
+4. TenantId による GSI Query 検証 (`query-user-policy.py --tenant ...`)
+5. Pre Token Generation Lambda クレーム生成シミュレーション (`query-user-policy.py --simulate-claims`)
+
+テスト結果は標準出力に表示されます。全クエリが正常にデータを返せば正常です。
+
+詳細な E2E テスト手順は [E2E_TEST_GUIDE.md](../../E2E_TEST_GUIDE.md) を参照してください。
 
 ## Pre Token Generation Lambda との連携
 

@@ -1,0 +1,51 @@
+# Memory ResourceTag ABAC 検証結果
+
+**検証日時**: (未実施)
+**全体ステータス**: [PENDING]
+
+## 検証した Condition Key
+
+```
+aws:ResourceTag/tenant_id == ${aws:PrincipalTag/tenant_id}
+```
+
+## 検証の目的
+
+Memory API に対して `aws:ResourceTag/tenant_id` Condition Key が動作するかを確認する。
+この Condition Key が動作すれば、Memory リソースにタグを付与するだけで
+IAM レベルのテナント分離が実現できる。
+
+## テストケース
+
+| Test | 説明 | 期待結果 |
+|------|------|---------|
+| Test 1 | Tenant A が自身の Memory にアクセス | 成功 |
+| Test 2 | Tenant B が自身の Memory にアクセス | 成功 |
+| Test 3 | Tenant A が Tenant B の Memory にアクセス | 拒否 |
+| Test 4 | Tenant B が Tenant A の Memory にアクセス | 拒否 |
+
+## テスト結果
+
+(test-resource-tag-abac.py の実行後に自動的に VERIFICATION_RESULT.md が生成されます)
+
+## 想定されるステータス
+
+### [OK] の場合
+
+`aws:ResourceTag/tenant_id` が Memory API で正常に動作する。
+S3 の `s3:ExistingObjectTag/tenant_id` と同様のパターンで利用可能。
+
+### [BLOCKED] の場合
+
+Memory API が ResourceTag Condition Key をサポートしていない。
+以下の代替案を検討:
+
+1. **bedrock-agentcore:namespace** (Example 02 で検証済み)
+2. **テナント別 Memory + Resource ARN 制限**
+3. **namespace + ResourceTag の将来的な組み合わせ**
+
+## 関連する Example
+
+- **Example 02**: IAM ABAC (namespace Condition Key) - [OK] 動作確認済み
+- **Example 11**: S3 ABAC (s3:ExistingObjectTag/tenant_id) - リファレンス実装
+- **Example 05**: End-to-End (STS SessionTags)

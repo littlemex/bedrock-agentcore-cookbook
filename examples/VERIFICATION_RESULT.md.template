@@ -1,0 +1,66 @@
+# [テスト名] E2E テスト結果
+
+## 概要
+
+| 項目 | 値 |
+|------|-----|
+| テスト名 | [テスト名] |
+| 実行日時 | [YYYY-MM-DDTHH:MM:SSZ] |
+| AWS アカウント | [AWS アカウント ID] |
+| リージョン | [AWS リージョン] |
+| 全体結果 | **[PASS/FAIL]** |
+
+## ステップ別結果
+
+```json
+{
+  "test_name": "[test-name-slug]",
+  "timestamp": "[YYYY-MM-DDTHH:MM:SSZ]",
+  "aws_account": "[account-id]",
+  "region": "[region]",
+  "overall_status": "[PASS/FAIL]",
+  "steps": [
+    {
+      "step": "[step-name]",
+      "status": "[PASS/FAIL/SKIP/WARN]",
+      "detail": "[詳細メッセージ]"
+    }
+  ]
+}
+```
+
+## ステータス定義
+
+| ステータス | 意味 |
+|-----------|------|
+| PASS | ステップが正常に完了 |
+| FAIL | ステップが失敗（全体結果も FAIL） |
+| SKIP | スクリプトが未実装などの理由でスキップ |
+| WARN | 完了したが警告あり（クリーンアップ不完全など） |
+
+## 検証内容
+
+1. **ステップ 1**: [説明]
+2. **ステップ 2**: [説明]
+3. **ステップ N**: [説明]
+
+## 使い方
+
+各 example ディレクトリの `run-e2e-test.sh` を実行すると、
+このテンプレートに基づいた `VERIFICATION_RESULT.md` が自動生成されます。
+
+```bash
+cd examples/[example-name]/
+./run-e2e-test.sh
+cat VERIFICATION_RESULT.md
+```
+
+## JSON 結果の解析例
+
+```bash
+# jq で全体ステータスを取得
+grep -A1 '"overall_status"' VERIFICATION_RESULT.md
+
+# 失敗ステップのみ抽出
+grep '"FAIL"' VERIFICATION_RESULT.md
+```
