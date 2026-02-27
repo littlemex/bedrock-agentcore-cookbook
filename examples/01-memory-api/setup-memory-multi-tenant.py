@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-E2E Phase 5: テナント別 Memory 作成（boto3 経由）
+マルチテナント Memory リソース作成スクリプト
 
 各テナント用に別の Memory リソースを作成してテナント分離を実現する。
 """

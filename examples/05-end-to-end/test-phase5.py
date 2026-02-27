@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-E2E Phase 5: Memory + IAM ABAC 検証スクリプト
+Memory + IAM ABAC 統合検証スクリプト
 
 Memory テナント分離、STS SessionTags ABAC、Cross-Tenant Deny ポリシーを検証する。
 """
@@ -412,7 +412,7 @@ def save_verification_report():
     """検証レポートを Markdown ファイルに保存"""
     config = load_config()
 
-    report = f"""# E2E Phase 5: Memory + IAM ABAC 検証結果
+    report = f"""# Memory + IAM ABAC Example: Memory + IAM ABAC 検証結果
 
 ## 検証概要
 
@@ -466,12 +466,12 @@ def save_verification_report():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="E2E Phase 5: Memory + IAM ABAC 検証")
+    parser = argparse.ArgumentParser(description="Memory + IAM ABAC Example: Memory + IAM ABAC 検証")
     parser.add_argument("--test", help="実行する個別テスト名")
     args = parser.parse_args()
 
     logger.info("=" * 60)
-    logger.info("E2E Phase 5: Memory + IAM ABAC Verification")
+    logger.info("Memory + IAM ABAC Example: Memory + IAM ABAC Verification")
     logger.info("=" * 60)
 
     # Config 読み込み

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-E2E Phase 5: IAM ロール作成（STS SessionTags ABAC）
+IAM ABAC ロール作成スクリプト（STS SessionTags）
 
 Tenant A と Tenant B 用の IAM ロールを作成する。
 - Trust Policy: STS AssumeRole + sts:TagSession 許可
@@ -94,9 +94,9 @@ def create_iam_role(iam_client, role_name, trust_policy, memory_policy, tenant_i
         response = iam_client.create_role(
             RoleName=role_name,
             AssumeRolePolicyDocument=json.dumps(trust_policy),
-            Description=f"E2E Phase 5: Tenant {tenant_id.upper()} Memory ABAC Role",
+            Description=f"Tenant {tenant_id.upper()} Memory ABAC Role (IAM ABAC Example)",
             Tags=[
-                {"Key": "project", "Value": "e2e-phase5"},
+                {"Key": "project", "Value": "memory-abac-example"},
                 {"Key": "tenant_id", "Value": tenant_id}
             ]
         )
@@ -150,12 +150,12 @@ def save_config(config):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="E2E Phase 5: IAM ロール作成")
+    parser = argparse.ArgumentParser(description="IAM ABAC ロール作成スクリプト")
     parser.add_argument("--dry-run", action="store_true", help="実行せずに確認のみ")
     args = parser.parse_args()
 
     print("=" * 60)
-    print("E2E Phase 5: IAM Roles Setup")
+    print("IAM ABAC Roles Setup")
     print("=" * 60)
 
     # Config 読み込み

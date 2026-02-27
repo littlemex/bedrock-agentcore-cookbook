@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-E2E Phase 5: クリーンアップスクリプト
+リソースクリーンアップスクリプト
 
 Memory リソースと IAM ロールを削除する。
 """

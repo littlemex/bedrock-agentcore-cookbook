@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-E2E Phase 5: Memory 作成（boto3 経由）
+Memory リソース作成スクリプト
 
-AgentCore Memory リソースを boto3 で作成する。
+AWS Bedrock AgentCore Memory リソースを boto3 で作成する。
 """
 
 import json
