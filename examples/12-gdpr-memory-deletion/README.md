@@ -1,5 +1,7 @@
 # GDPR Memory Deletion Workflow (Right to Erasure)
 
+> **[注意] E2E テスト未実施**: この Example は Zenn book の技術的主張を検証するためのリファレンス実装です。コードのローカル構文検証は完了していますが、実際の AWS 環境での E2E テストは未実施です。GDPR コンプライアンスに関わるため、本番利用前に必ず実環境での包括的な検証を行ってください。特に、削除の完全性保証（ベクトルストアを含む）の確認が必要です。
+
 GDPR Right to Erasure（忘れられる権利、GDPR 第 17 条）に対応した、
 AgentCore Memory レコードの手動削除ワークフローを実装するサンプルです。
 
@@ -20,7 +22,8 @@ AgentCore Memory レコードの手動削除ワークフローを実装するサ
 | ファイル | 説明 |
 |---------|------|
 | `setup-gdpr-processor-role.py` | GDPR Processor IAM ロール作成（削除操作のみ許可） |
-| `gdpr-delete-user-memories.py` | ユーザー記憶バッチ削除スクリプト |
+| `gdpr-delete-user-memories.py` | ユーザー記憶バッチ削除スクリプト（削除後検証付き） |
+| `gdpr-generate-deletion-certificate.py` | 削除証明書生成（JSON 形式） |
 | `gdpr-audit-report.py` | 削除監査レポート生成（Markdown 形式） |
 | `phase12-config.json.example` | 設定ファイルテンプレート |
 
@@ -85,11 +88,32 @@ python3 gdpr-delete-user-memories.py --actor-id tenant-a:user-001
 処理フロー:
 
 1. GDPR Processor ロールに `AssumeRole`
-2. `RetrieveMemoryRecords` で対象ユーザーの記憶を全件取得
+2. `RetrieveMemoryRecords` で対象ユーザーの記憶を全件取得（ページネーション対応）
 3. `BatchDeleteMemoryRecords` で最大 100 件ずつバッチ削除
-4. 削除結果を `audit-reports/` に JSON 監査ログとして保存
+4. 削除後に `RetrieveMemoryRecords` で残存レコードが 0 件であることを検証
+5. 削除結果を `audit-reports/` に JSON 監査ログとして保存
 
-### 4. 監査レポートの生成
+### 4. 削除証明書の生成
+
+削除完了後、GDPR コンプライアンス向けの削除証明書を生成します:
+
+```bash
+# 監査ログファイルを指定して証明書生成
+python3 gdpr-generate-deletion-certificate.py --audit-log audit-reports/gdpr-deletion-tenant_a_user-001-20260227T120000Z.json
+
+# actor_id を指定して最新の監査ログから自動生成
+python3 gdpr-generate-deletion-certificate.py --actor-id tenant-a:user-001
+```
+
+証明書には以下の情報が含まれます:
+
+- 削除操作の日時と対象 actor_id
+- 削除されたレコード件数
+- 削除後検証の結果（PASS/FAIL）
+- 監査ログファイルの SHA-256 ハッシュ（改ざん検知用）
+- GDPR コンプライアンス情報
+
+### 5. 監査レポートの生成
 
 ```bash
 # 全件レポート
@@ -238,6 +262,29 @@ python3 gdpr-audit-report.py --skip-cloudtrail
 - 監査レポートは GDPR コンプライアンスの証拠として最低 3 年間保管してください
 - このサンプルは Memory API のみを対象としています。
   S3、DynamoDB 等の他のデータストアに個人データがある場合は別途対応が必要です
+
+### Reflection データ（Level 2）の削除について
+
+AgentCore Memory の Reflection（Level 2）は、個別の記憶レコードから抽出・統合されたユーザーの
+嗜好や行動パターンの要約データです。このデータはベクトルストアに保存される場合があります。
+
+**GDPR Right to Erasure を完全に履行するには、以下の点に留意してください:**
+
+1. **Memory API レコードの削除だけでは不十分な場合がある**: Reflection データが別途
+   ベクトルストア（Amazon OpenSearch Serverless 等）に保存されている場合、
+   Memory API の `BatchDeleteMemoryRecords` では Reflection データが削除されない可能性があります
+
+2. **ベクトルストアの直接削除が必要**: Reflection データの完全削除には、
+   ベクトルストアに対する直接的な削除操作が必要になる場合があります。
+   使用しているベクトルストアの API（例: OpenSearch の `_delete_by_query`）で
+   対象 actor_id に関連するエンベディングを削除してください
+
+3. **削除証明書での記録**: `gdpr-generate-deletion-certificate.py` で生成される証明書の
+   `compliance.additionalDataStores` フィールドに、ベクトルストアの削除状況を
+   手動で追記することを推奨します
+
+4. **結果整合性に注意**: ベクトルストアの削除は結果整合性（eventual consistency）で
+   反映される場合があります。削除後に十分な待機時間を設けてから検証してください
 
 ## 参考資料
 

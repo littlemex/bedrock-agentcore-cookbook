@@ -7,9 +7,10 @@ GDPR Right to Erasure（忘れられる権利）に基づき、
 
 処理フロー:
 1. GDPR Processor ロールに AssumeRole
-2. RetrieveMemoryRecords で対象ユーザーの記憶を全件取得
+2. RetrieveMemoryRecords で対象ユーザーの記憶を全件取得（ページネーション対応）
 3. BatchDeleteMemoryRecords で最大 100 件ずつバッチ削除
-4. 削除結果を JSON 監査ログとして出力
+4. 削除後に RetrieveMemoryRecords で残存レコードが 0 件であることを検証
+5. 削除結果を JSON 監査ログとして出力
 
 使用例:
   python3 gdpr-delete-user-memories.py --actor-id tenant-a:user-001
@@ -218,7 +219,64 @@ def batch_delete_memories(client, memory_id, strategy_id, records, dry_run=False
     }
 
 
-def save_audit_log(actor_id, records, delete_result, dry_run=False):
+def verify_deletion(client, memory_id, strategy_id, actor_id):
+    """削除後に残存レコードが 0 件であることを検証
+
+    RetrieveMemoryRecords API でページネーションを行い、
+    対象 actor_id のレコードが完全に削除されたことを確認する。
+    """
+    print(f"[INFO] Verifying deletion completeness for actor: {actor_id}")
+
+    remaining_records = []
+    next_token = None
+
+    while True:
+        kwargs = {
+            "memoryId": memory_id,
+            "memoryStrategyId": strategy_id,
+            "namespace": actor_id.split(":")[0] if ":" in actor_id else actor_id,
+            "actorId": actor_id
+        }
+        if next_token:
+            kwargs["nextToken"] = next_token
+
+        try:
+            response = client.retrieve_memory_records(**kwargs)
+        except ClientError as e:
+            print(f"[ERROR] Verification query failed: {e}")
+            return {"verified": False, "error": str(e), "remainingCount": -1}
+
+        records = response.get("memoryRecords", [])
+        remaining_records.extend(records)
+
+        next_token = response.get("nextToken")
+        if not next_token:
+            break
+
+    remaining_count = len(remaining_records)
+
+    if remaining_count == 0:
+        print("[OK] Deletion verified: 0 records remaining")
+        return {"verified": True, "remainingCount": 0}
+    else:
+        print(f"[WARNING] Deletion incomplete: {remaining_count} records still remaining")
+        remaining_ids = [
+            r.get("memoryRecordId", r.get("id", "unknown"))
+            for r in remaining_records
+        ]
+        for rid in remaining_ids[:10]:
+            print(f"  - {rid}")
+        if remaining_count > 10:
+            print(f"  ... and {remaining_count - 10} more")
+        return {
+            "verified": False,
+            "remainingCount": remaining_count,
+            "remainingRecordIds": remaining_ids
+        }
+
+
+def save_audit_log(actor_id, records, delete_result, dry_run=False,
+                   verification_result=None):
     """削除監査ログを JSON ファイルとして保存"""
     os.makedirs(AUDIT_REPORT_DIR, exist_ok=True)
 
@@ -236,6 +294,11 @@ def save_audit_log(actor_id, records, delete_result, dry_run=False):
             "totalRecordsFound": len(records),
             "totalDeleted": delete_result["deleted"],
             "totalFailed": delete_result["failed"]
+        },
+        "verification": verification_result if verification_result else {
+            "verified": None,
+            "remainingCount": None,
+            "note": "Verification skipped (dry-run or no records)"
         },
         "batches": delete_result["batches"],
         "records": [
@@ -335,9 +398,24 @@ def main():
         client, memory_id, strategy_id, records, dry_run=args.dry_run
     )
 
-    # Step 3: 監査ログ保存
-    print(f"\n[STEP 3] Saving audit log...")
-    audit_filepath = save_audit_log(args.actor_id, records, delete_result, args.dry_run)
+    # Step 3: 削除後検証
+    verification_result = None
+    if not args.dry_run and delete_result["deleted"] > 0:
+        print(f"\n[STEP 3] Verifying deletion completeness...")
+        verification_result = verify_deletion(
+            client, memory_id, strategy_id, args.actor_id
+        )
+    elif args.dry_run:
+        print(f"\n[STEP 3] Skipping verification (dry-run mode)")
+    else:
+        print(f"\n[STEP 3] Skipping verification (no records deleted)")
+
+    # Step 4: 監査ログ保存
+    print(f"\n[STEP 4] Saving audit log...")
+    audit_filepath = save_audit_log(
+        args.actor_id, records, delete_result, args.dry_run,
+        verification_result=verification_result
+    )
 
     # 結果サマリー
     print("\n" + "=" * 60)
@@ -350,6 +428,10 @@ def main():
     print(f"  Records found:   {len(records)}")
     print(f"  Records deleted: {delete_result['deleted']}")
     print(f"  Records failed:  {delete_result['failed']}")
+    if verification_result:
+        verified_status = "PASS" if verification_result["verified"] else "FAIL"
+        print(f"  Verification:    {verified_status} "
+              f"(remaining: {verification_result['remainingCount']})")
     print(f"  Audit log:       {audit_filepath}")
 
     if delete_result["failed"] > 0:
@@ -357,9 +439,17 @@ def main():
         print("  Review the audit log and retry if necessary.")
         sys.exit(1)
 
+    if verification_result and not verification_result["verified"]:
+        print(f"\n[WARNING] Deletion verification failed: "
+              f"{verification_result['remainingCount']} records still remaining.")
+        print("  Retry the deletion or investigate the remaining records.")
+        sys.exit(1)
+
     print(f"\nNext steps:")
-    print(f"  1. Run: python3 gdpr-audit-report.py")
-    print(f"  2. Verify CloudTrail logs for deletion events")
+    print(f"  1. Run: python3 gdpr-generate-deletion-certificate.py "
+          f"--audit-log {audit_filepath}")
+    print(f"  2. Run: python3 gdpr-audit-report.py")
+    print(f"  3. Verify CloudTrail logs for deletion events")
 
 
 if __name__ == "__main__":

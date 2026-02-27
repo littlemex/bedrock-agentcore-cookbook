@@ -1,5 +1,7 @@
 # Example 11: S3 ABAC (Attribute-Based Access Control)
 
+> **[注意] E2E テスト未実施**: この Example は Zenn book の技術的主張を検証するためのリファレンス実装です。コードのローカル構文検証は完了していますが、実際の AWS 環境での E2E テストは未実施です。本番利用前に必ず実環境での検証を行ってください。
+
 この Example では、S3 オブジェクトタグと STS セッションタグを使用した ABAC パターンを実装します。
 
 ## 概要

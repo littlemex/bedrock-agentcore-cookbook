@@ -1,5 +1,7 @@
 # Phase 13: AuthPolicyTable (DynamoDB)
 
+> **[注意] E2E テスト未実施**: この Example は Zenn book の技術的主張を検証するためのリファレンス実装です。DynamoDB テーブル作成とクエリのローカル検証は完了していますが、Cognito Pre Token Generation Lambda との統合 E2E テストは未実施です。本番利用前に実環境での統合テストを行ってください。
+
 Pre Token Generation Lambda 用の認証ポリシーテーブル実装。
 
 ## 概要

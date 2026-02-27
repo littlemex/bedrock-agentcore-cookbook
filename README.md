@@ -225,6 +225,35 @@ python3 query-user-policy.py --email admin@tenant-a.example.com
 
 詳細: [examples/13-auth-policy-table/README.md](examples/13-auth-policy-table/README.md)
 
+## セキュリティレビュー結果（2026-02-27）
+
+本 cookbook および関連する Zenn book に対してセキュリティレビューを実施しました。詳細は [IMPROVEMENT_SUMMARY.md](IMPROVEMENT_SUMMARY.md) を参照してください。
+
+### レビュー概要
+
+| 深刻度 | 検出数 | 対応済み | 未対応 |
+|--------|--------|----------|--------|
+| CRITICAL | 6 | 4 | 2 |
+| HIGH | 7 | 5 | 2 |
+| MEDIUM | 3 | 1 | 2 |
+
+### 主な改善実施項目
+
+- Zenn book のセキュリティコード修正（JWT 署名検証、GDPR テナント分離、Cedar LOG_ONLY 注記）
+- GDPR 削除ワークフローの完全性検証フロー追加（examples/12）
+- テナント ID バリデーション、ログ出力セキュリティの注記強化
+
+### 未対応項目（実環境必要）
+
+- Gateway 経由の E2E テスト（examples/03, 06, 07）
+- Cognito Client Secret Lifecycle Management 検証（examples/08, 09, 10）
+- Policy Engine ENFORCE モード検証（examples/04）
+- パフォーマンス測定（レイテンシー比較、コールドスタート影響）
+
+Examples 11-13 は Zenn book のコード検証を目的として作成されましたが、実環境での E2E テストは未実施です。各 example の README.md に検証状況の注記があります。
+
+---
+
 ## 重要な発見事項
 
 このリポジトリの例は、実際の E2E 検証を通じて得られた知見に基づいています。主な発見事項：

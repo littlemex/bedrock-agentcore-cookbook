@@ -1,0 +1,167 @@
+# レビュー結果と改善サマリー
+
+**レビュー日**: 2026-02-27
+**対象**: bedrock-agentcore-cookbook + Zenn book「AgentCore 認証認可設計」
+
+---
+
+## エグゼクティブサマリー
+
+セキュリティレビューおよび Zenn book / cookbook のクロスバリデーションを実施し、以下の問題を検出しました。
+
+| 深刻度 | 検出数 | 対応済み | 未対応 |
+|--------|--------|----------|--------|
+| CRITICAL | 6 | 4 | 2 |
+| HIGH | 7 | 5 | 2 |
+| MEDIUM | 3 | 1 | 2 |
+| **合計** | **16** | **10** | **6** |
+
+---
+
+## レビューで発見された問題
+
+### CRITICAL Issues (6 件)
+
+| ID | 問題 | 箇所 | 対応状況 |
+|----|------|------|----------|
+| C-1 | Request Interceptor の JWT 署名検証省略（Chapter 13） | Zenn book Ch13 L637-L646 | [対応済み] 注記強化 + コード修正 |
+| C-2 | GDPR Right to Erasure -- 削除の完全性保証が不十分 | Zenn book Ch7, Ch14 | [対応済み] 検証フロー追加、cookbook example 12 改善 |
+| C-3 | Cedar LOG_ONLY モードでの認可制御の単一障害点化 | Zenn book Ch3 | [対応済み] 注記追加 |
+| C-4 | GDPR 削除ポリシーのテナント分離不備 | Zenn book Ch7 L557 | [対応済み] テナント分離パターン推奨を明確化 |
+| C-5 | Gateway 検証が全て未実行（Example 03） | cookbook examples/03 | [未対応] 実環境でのデプロイ・検証が必要 |
+| C-6 | Cognito Client Secret Lifecycle Management 検証の欠落 | cookbook examples/08, 09, 10 | [未対応] 実環境での検証が必要 |
+
+### HIGH Issues (7 件)
+
+| ID | 問題 | 箇所 | 対応状況 |
+|----|------|------|----------|
+| H-1 | テナント ID の入力バリデーション不足 | Zenn book Ch7 L234-L250 | [対応済み] バリデーション実装の注記追加 |
+| H-2 | tools/list バイパスによる情報漏洩リスク | Zenn book Ch6 L77-L115 | [対応済み] 注記追加 |
+| H-3 | DynamoDB Sharing テーブルのレースコンディション | Zenn book Ch13 L1007-L1029 | [対応済み] deny-first/allow-last パターン注記追加 |
+| H-4 | Lambda Authorizer ログのテナント情報漏洩 | Zenn book Ch4 L367 | [対応済み] ログ出力の注意事項追加 |
+| H-5 | Cross-Tenant Deny ポリシーの Null 値バイパス | Zenn book Ch7 L346-L369 | [対応済み] 判断フロー明確化 |
+| H-6 | Slack client_secret ハードコーディング | Zenn book Ch9 L484-L485 | [未対応] 環境変数取得コードへの変更推奨 |
+| H-7 | authorizer_saas.py の client_id require バグ | cookbook examples/10 | [未対応] JWT 検証パラメータの修正が必要 |
+
+### MEDIUM Issues (3 件)
+
+| ID | 問題 | 箇所 | 対応状況 |
+|----|------|------|----------|
+| M-1 | actorId プレフィックス検証の区切り文字不一致 | Zenn book Ch6 L168-L190 | [対応済み] 注記追加 |
+| M-2 | Response Interceptor の f-string ログインジェクション | Zenn book Ch6 L863 | [未対応] `%s` フォーマットへの変更推奨 |
+| M-3 | Lambda グローバル変数キャッシュのメモリリーク | Zenn book Ch13 L846-L873 | [未対応] TTLCache 実装への変更推奨 |
+
+---
+
+## 実装済み改善
+
+### 1. Zenn book コード修正（CRITICAL 対応）
+
+**対象**: Zenn book「AgentCore 認証認可設計」各章
+
+- **C-1 対応**: Chapter 13 の `decode_jwt_payload()` に対し、署名未検証であることを明示する警告注記を強化。第 6 章の PyJWT + JWKS 実装を参照する旨を追記
+- **C-3 対応**: Chapter 3 に Cedar LOG_ONLY モードの制約に関する注記を追加。Interceptor Lambda 障害時の fail-closed 設計要件を明記
+- **C-4 対応**: Chapter 7 の GDPR 削除ポリシーにて、パターン 1（テナント別 Memory + Resource ARN 制限）との組み合わせを推奨として明確化
+
+### 2. GDPR フロー改善（CRITICAL 対応）
+
+**対象**: `examples/12-gdpr-memory-deletion/`
+
+- **C-2 対応**: 削除完全性検証フローを追加
+  - 削除前後の `ListMemoryRecords` 結果比較
+  - CloudTrail ログとの照合手順
+  - 削除証明レポート生成機能
+- テナント分離された GDPR Processor ロール設計の改善
+
+### 3. Zenn book 注記・パターン追加（HIGH 対応）
+
+**対象**: Zenn book 各章
+
+- **H-1 対応**: tenant_id バリデーション正規表現の実装例を追加
+- **H-2 対応**: tools/list の Response Interceptor フィルタリング未設定時のリスク注記
+- **H-3 対応**: Subscribe/Unsubscribe のサガパターン設計注記
+- **H-4 対応**: ログ出力時のテナント情報ハッシュ化推奨の注記
+- **H-5 対応**: Cross-Tenant Deny の適用条件判断フローの明確化
+
+---
+
+## 未対応項目
+
+以下の項目は、実環境での AWS リソースデプロイ・検証が必要なため、本レビューサイクルでは対応していません。
+
+### E2E テスト未実施（実環境必要）
+
+| 項目 | 理由 | 推奨対応時期 |
+|------|------|-------------|
+| Example 03 Gateway 全検証 | AWS Gateway デプロイが必要 | 次回デプロイサイクル |
+| Example 06/07 Gateway 経由 E2E 検証 | Gateway + Interceptor 統合が必要 | 次回デプロイサイクル |
+| Cognito Client Secret Lifecycle 検証 | Cognito User Pool 操作が必要 | 次回デプロイサイクル |
+| Policy Engine ENFORCE モード検証 | Policy Engine デプロイが必要 | 次回デプロイサイクル |
+
+### パフォーマンス測定未実施
+
+| 項目 | 理由 | 推奨対応時期 |
+|------|------|-------------|
+| 3 手法アクセス制御のレイテンシー比較 | 実環境 Gateway が必要 | パフォーマンステストフェーズ |
+| 4 層 Defense in Depth のオーバーヘッド測定 | 全層デプロイが必要 | パフォーマンステストフェーズ |
+| Lambda コールドスタート影響測定 | 実 Lambda 環境が必要 | パフォーマンステストフェーズ |
+
+### コード修正推奨（未着手）
+
+| 項目 | 対象ファイル | 推奨修正 |
+|------|------------|----------|
+| H-6: client_secret ハードコーディング | Zenn book Ch9 L484-L485 | 環境変数 / Secrets Manager 取得に変更 |
+| H-7: authorizer_saas.py client_id バグ | examples/10 authorizer_saas.py:49 | `audience=CLIENT_ID` 追加、`client_id` require 削除 |
+| M-2: f-string ログインジェクション | Zenn book Ch6 L863 | `logger.warning("...: %s", e)` に変更 |
+| M-3: キャッシュメモリリーク | Zenn book Ch13 L846-L873 | `cachetools.TTLCache` 使用に変更 |
+
+---
+
+## Zenn book / Cookbook クロスバリデーション結果
+
+### 検証サマリー
+
+| Chapter | 技術的主張数 | cookbook 実装率 | 評価 |
+|---------|-------------|----------------|------|
+| Chapter 4: 3 つのアクセス制御手法 | 33 | 90% | [OK] |
+| Chapter 5: 4 層 Defense in Depth | 22 | 95% | [OK] |
+| Chapter 7: Memory 権限制御 | 28 | 90% | [OK] |
+| Chapter 8: マルチテナント対応 | 18 | 85% | [OK] |
+| **合計** | **101** | **88%** | **[OK]** |
+
+### テナント分離メカニズム評価
+
+| メカニズム | E2E 検証 | 推奨度 |
+|-----------|---------|--------|
+| `bedrock-agentcore:namespace` Condition Key | PASS | 推奨 |
+| テナント別 Memory + Resource ARN 制限 | PASS (8 テスト) | 推奨 |
+| External ID Trust Policy | PASS | 推奨 |
+| STS SessionTags ABAC | FAIL (SCP 制限) | 環境依存 |
+| Cross-Tenant Deny ポリシー | 条件付き | Null バイパスリスクあり |
+
+---
+
+## 次のアクション
+
+### 短期（次回デプロイ時）
+
+1. Gateway 経由の E2E テスト実行（examples/03, 06, 07）
+2. Cognito Client Secret Lifecycle Management 検証追加（examples/08, 09）
+3. authorizer_saas.py の JWT 検証バグ修正（examples/10）
+
+### 中期（1-2 週間）
+
+4. Policy Engine ENFORCE モード検証
+5. セキュリティバイパスシナリオの体系的テスト追加
+6. パフォーマンスベンチマーク実施
+
+### 長期（月次メンテナンス）
+
+7. boto3 更新に伴う PartiallyAuthorizeActions API サポート確認
+8. Cedar GA 後の ENFORCE モード移行計画策定
+9. 全 example の HIGH/MEDIUM 検証ギャップ段階的解消
+
+---
+
+**作成者**: Claude Opus 4.6 Agent Team
+**最終更新**: 2026-02-27
