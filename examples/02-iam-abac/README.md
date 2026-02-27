@@ -10,7 +10,9 @@ IAM ABAC を使用すると、リソースタグと IAM プリンシパルタグ
 
 - `setup-iam-roles.py` - ABAC 用 IAM Role とポリシーのセットアップ
 - `test-h1-condition-key.py` - `bedrock-agentcore:namespace` Condition Key の検証（Create/Retrieve）
-- `test-write-operations-abac.py` - Write 操作（Delete/Update）の完全検証- `test-namespace-security.py` - namespace セキュリティ検証（StringLike/StringEquals）- `test-actorId-condition-key.py` - `bedrock-agentcore:actorId` Condition Key の検証
+- `test-write-operations-abac.py` - Write 操作（Delete/Update）の完全検証
+- `test-namespace-security.py` - namespace セキュリティ検証（StringLike/StringEquals）
+- `test-actorId-condition-key.py` - `bedrock-agentcore:actorId` Condition Key の検証
 - `H1_VERIFICATION_RESULT.md` - H-1 検証結果レポート（namespace）
 - `ACTORID_VERIFICATION_RESULT.md` - actorId Condition Key 検証結果レポート
 - `VERIFICATION_RESULT.md` - 全体的な検証結果レポート
@@ -74,6 +76,7 @@ python test-h1-condition-key.py
 このスクリプトは、`bedrock-agentcore:namespace` Condition Key が Create/Retrieve 操作で正常に動作するかを検証します。
 
 4. Write 操作の完全検証
+
 ```bash
 python test-write-operations-abac.py
 ```
@@ -105,6 +108,7 @@ python test-write-operations-abac.py
 - phase5-config.json が存在する
 
 5. namespace セキュリティ検証
+
 ```bash
 python test-namespace-security.py
 ```

@@ -31,9 +31,9 @@ Phase 4 レビューで「`bedrock-agentcore:namespace` Condition Key の未サ�
 
 ```
 An error occurred (AccessDeniedException) when calling the BatchCreateMemoryRecords operation:
-User: arn:aws: sts::123456789012: assumed-role/e2e-h1-test-role-with-condition/h1-test-1-2
+User: arn:aws:sts::123456789012: assumed-role/e2e-h1-test-role-with-condition/h1-test-1-2
 is not authorized to perform: bedrock-agentcore:BatchCreateMemoryRecords
-on resource: arn:aws: bedrock-agentcore:us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk
+on resource: arn:aws:bedrock-agentcore:us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk
 because no identity-based policy allows the bedrock-agentcore:BatchCreateMemoryRecords action
 ```
 
