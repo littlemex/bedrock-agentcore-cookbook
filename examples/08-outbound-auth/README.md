@@ -14,9 +14,10 @@ Outbound Auth は、Gateway が MCP サーバーに代わって外部サービ�
 
 ```
 08-outbound-auth/
-├── README.md                    # このファイル
-├── verify-outbound-auth.py      # 検証スクリプト
-└── VERIFICATION_RESULT.md       # 検証結果レポート
+├── README.md                           # このファイル
+├── verify-outbound-auth.py             # 基本検証スクリプト
+├── test-cognito-secret-rotation.py     # Cognito シークレット回転検証スクリプト
+└── VERIFICATION_RESULT.md              # 検証結果レポート
 ```
 
 ## 検証内容
@@ -80,6 +81,110 @@ Gateway Target に設定可能な認証プロバイダタイプ：
 | GATEWAY_IAM_ROLE | Gateway の IAM ロールを使用 |
 | OAUTH | OAuth2 Credential Provider を使用 |
 | API_KEY | API Key Credential Provider を使用 |
+
+## Cognito Client Secret Lifecycle Management
+
+### 概要
+
+Amazon Cognito User Pool の App Client シークレットは、セキュリティのベストプラクティスとして定期的に回転（ローテーション）する必要があります。Cognito は以下の API を提供しています：
+
+- **AddUserPoolClientSecret**: 新しいシークレットを追加（最大 2 つまで同時保持可能）
+- **DeleteUserPoolClientSecret**: 旧シークレットを削除
+
+これにより、**ゼロダウンタイムでのシークレット回転**が可能になります。
+
+### シークレット回転の手順
+
+#### Phase 1: 新しいシークレットの追加
+
+```python
+import boto3
+
+cognito = boto3.client("cognito-idp", region_name="us-east-1")
+
+# 新しいシークレットを追加
+response = cognito.add_user_pool_client_secret(
+    UserPoolId="us-east-1_XXXXXXXXX",
+    ClientId="xxxxxxxxxxxxxxxxxxxxxxxxxx"
+)
+
+new_secret_id = response["ClientSecretId"]
+print(f"New Secret ID: {new_secret_id}")
+```
+
+**重要**: 新しいシークレット値は、このレスポンスで一度だけ取得できます。必ず AWS Secrets Manager または環境変数に保存してください。
+
+#### Phase 2: デュアルシークレット運用
+
+新旧両方のシークレットが有効な状態で運用します。この期間中：
+- 旧シークレットで発行された Token Vault 内のトークンは有効
+- 新シークレットでの新規認証が可能
+- **ダウンタイムなし**でアプリケーションを新シークレットに移行可能
+
+#### Phase 3: OAuth2 Credential Provider の更新
+
+```python
+agentcore = boto3.client("bedrock-agentcore-control", region_name="us-east-1")
+
+# Credential Provider を新しいシークレットで更新
+agentcore.update_oauth2_credential_provider(
+    credentialProviderId="provider-xxx",
+    oauth2ProviderConfigInput={
+        "cognitoOauth2ProviderConfig": {
+            "clientSecret": new_secret_value  # 新しいシークレット値
+        }
+    }
+)
+```
+
+#### Phase 4: 旧シークレットの削除
+
+新シークレットでの動作確認後、旧シークレットを削除します。
+
+```python
+# 旧シークレットを削除
+cognito.delete_user_pool_client_secret(
+    UserPoolId="us-east-1_XXXXXXXXX",
+    ClientId="xxxxxxxxxxxxxxxxxxxxxxxxxx",
+    SecretId=old_secret_id  # DescribeUserPoolClient で取得
+)
+```
+
+### 検証スクリプト
+
+Cognito Client Secret の回転プロセスを検証するスクリプトを提供しています：
+
+```bash
+# 環境変数を設定
+export USER_POOL_ID="us-east-1_XXXXXXXXX"
+export CLIENT_ID="xxxxxxxxxxxxxxxxxxxxxxxxxx"
+export AWS_DEFAULT_REGION="us-east-1"
+
+# 検証スクリプトを実行
+python3 test-cognito-secret-rotation.py
+```
+
+このスクリプトは以下を検証します：
+1. CognitoOauth2 ベンダーでの Credential Provider 作成
+2. AddUserPoolClientSecret による新しいシークレット追加
+3. Credential Provider の clientSecret 更新
+4. デュアルシークレット運用の動作確認
+5. DeleteUserPoolClientSecret による旧シークレット削除
+6. ゼロダウンタイムの確認
+
+### ベストプラクティス
+
+1. **定期的な回転**: 90 日ごとにシークレットを回転することを推奨
+2. **Secrets Manager 連携**: シークレット値は AWS Secrets Manager に保存
+3. **監視**: CloudWatch Logs で認証失敗をモニタリング
+4. **テスト環境で検証**: 本番環境での回転前に、必ずテスト環境で手順を検証
+
+### 注意事項
+
+- Cognito App Client は最大 2 つのシークレットを同時に保持できます
+- シークレット値は初回作成時のみ取得可能です
+- DescribeUserPoolClient API ではシークレット値は取得できません（シークレット ID のみ）
+- `SECRET_HASH` の計算には最新のシークレットを使用してください
 
 ## OAuth2 Credential Provider の作成例
 

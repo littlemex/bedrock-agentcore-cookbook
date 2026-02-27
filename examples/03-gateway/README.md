@@ -9,6 +9,9 @@ AgentCore Gateway は、MCP（Model Context Protocol）サーバーやカスタ�
 ## ファイル構成
 
 - `deploy-gateway.py` - Gateway のデプロイスクリプト
+- `create-policy-engine.py` - Policy Engine の作成
+- `put-cedar-policies.py` - Cedar ポリシーの登録
+- `test-phase3.py` - E2E 検証スクリプト
 - `cleanup.py` - 作成したリソースのクリーンアップ
 - `VERIFICATION_RESULT.md` - 検証結果レポート
 
@@ -66,6 +69,111 @@ python deploy-gateway.py
 - Cognito JWT Authorizer の設定
 
 実行が成功すると、`gateway-config.json` が作成されます。
+
+3. Policy Engine の作成
+
+```bash
+# Gateway ID を環境変数に設定
+export GATEWAY_ID=$(python3 deploy-gateway.py --get-id)
+
+# LOG_ONLY モードで Policy Engine を作成
+python3 create-policy-engine.py --mode LOG_ONLY
+
+# Policy Engine ID を環境変数に設定
+export POLICY_ENGINE_ID=$(python3 create-policy-engine.py --get-id)
+```
+
+4. Cedar ポリシーの登録
+
+```bash
+# 全てのポリシーを登録（admin, user, guest）
+python3 put-cedar-policies.py
+
+# 特定のポリシーのみ登録
+python3 put-cedar-policies.py --policy admin
+
+# 既存のポリシーを確認
+python3 put-cedar-policies.py --list
+```
+
+5. E2E 検証の実行
+
+```bash
+# 検証スクリプトを実行
+python3 test-phase3.py
+```
+
+検証項目：
+- Test 1: JWT 認証バイパステスト（無効 JWT、JWT なしでの拒否）
+- Test 2: Policy Engine LOG_ONLY モードの動作確認
+- Test 3: Policy Engine ENFORCE モードの動作確認
+- Test 4: Cedar Policy による RBAC（Admin ロール）
+- Test 5: Cedar Policy による RBAC（User ロール）
+- Test 6: Gateway IAM Role の権限昇格防止
+
+## Policy Engine と Cedar Policy
+
+### Policy Engine のモード
+
+- **LOG_ONLY**: ポリシー評価をログに記録するが、アクセス制御は行わない
+- **ENFORCE**: Cedar ポリシーに基づいて実際にアクセス制御を行う
+
+### モードの変更
+
+```bash
+# ENFORCE モードに変更
+python3 create-policy-engine.py --update-mode ENFORCE
+
+# LOG_ONLY モードに戻す
+python3 create-policy-engine.py --update-mode LOG_ONLY
+```
+
+### Cedar ポリシーの例
+
+#### Admin Policy
+```cedar
+// Admin ロールは全てのツールにアクセス可能
+permit (
+    principal is AgentCore::OAuthUser,
+    action,
+    resource
+)
+when {
+    principal.hasTag("role") &&
+    principal.getTag("role") == "admin"
+};
+```
+
+#### User Policy
+```cedar
+// User ロールは制限されたツールのみアクセス可能
+permit (
+    principal is AgentCore::OAuthUser,
+    action in [
+        AgentCore::Action::"mcp-target___retrieve_doc",
+        AgentCore::Action::"mcp-target___list_tools"
+    ],
+    resource
+)
+when {
+    principal.hasTag("role") &&
+    principal.getTag("role") == "user"
+};
+```
+
+#### Guest Policy (forbid)
+```cedar
+// Guest ロールは全てのツールへのアクセスを拒否
+forbid (
+    principal is AgentCore::OAuthUser,
+    action,
+    resource
+)
+when {
+    principal.hasTag("role") &&
+    principal.getTag("role") == "guest"
+};
+```
 
 ## 重要な API パラメータ
 

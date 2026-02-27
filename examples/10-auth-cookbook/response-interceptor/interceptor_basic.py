@@ -39,7 +39,8 @@ def decode_jwt_payload(token):
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"require": ["exp", "client_id", "token_use"]},
+            audience=CLIENT_ID,
+            options={"require": ["exp", "token_use"]},
         )
         return claims
     else:
