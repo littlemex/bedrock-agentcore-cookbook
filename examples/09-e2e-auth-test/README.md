@@ -41,6 +41,14 @@
 - [x] カスタムクレーム注入（role, tenant_id, agent_id）
 - [x] 全ユースケースの E2E フロー確認
 
+### Phase 5: Cognito Client Secret Rotation（Chapter 8）
+
+- [x] AddUserPoolClientSecret API の動作確認
+- [x] デュアルシークレット状態での認証検証
+- [x] RefreshToken フローの動作確認
+- [x] DeleteUserPoolClientSecret API の動作確認
+- [x] ゼロダウンタイムローテーションの検証
+
 ## 前提条件
 
 ### 必須
@@ -99,22 +107,81 @@ chmod +x deploy-lambda-functions.sh
 
 #### Step 4: E2E テストの実行
 
+すべてのテストを実行：
+
 ```bash
-python3 e2e-test.py
+./run_all_tests.sh
 ```
+
+または、個別にテストを実行：
+
+```bash
+# Inbound Auth 統合フロー
+python3 tests/test_inbound_auth.py
+
+# Outbound Auth - Secrets Manager
+python3 tests/test_outbound_auth_secrets_manager.py
+
+# Memory API ABAC
+python3 tests/test_memory_api_abac.py
+
+# Dual Auth 独立性
+python3 tests/test_dual_auth_independence.py
+
+# Cognito Client Secret Rotation（NEW）
+python3 tests/test_cognito_secret_rotation_e2e.py
+```
+
+### Cognito Client Secret Rotation テストについて
+
+`test_cognito_secret_rotation_e2e.py` は、2026 年 2 月にリリースされた Cognito Client Secret Lifecycle Management 機能の E2E 検証を行います。
+
+**検証項目**：
+
+1. **CSR-01**: 初期状態の確認（現在のシークレット数を取得）
+2. **CSR-02**: 新しいシークレットの追加（AddUserPoolClientSecret API）
+3. **CSR-03**: デュアルシークレット状態での認証（古いシークレットと新しいシークレットの両方で認証可能）
+4. **CSR-04**: 新しいシークレットでの RefreshToken フロー
+5. **CSR-05**: 古いシークレットの削除（DeleteUserPoolClientSecret API）
+6. **CSR-06**: ゼロダウンタイムローテーションの検証（切り替え中も認証が継続）
+
+**前提条件**：
+
+- `.env` ファイルに以下の環境変数が設定されていること：
+  - `USER_POOL_ID`: Cognito User Pool ID
+  - `CLIENT_ID`: Cognito App Client ID
+  - `CLIENT_SECRET`: Cognito App Client Secret
+  - `TEST_USER_EMAIL`: テストユーザーのメールアドレス
+  - `TEST_USER_PASSWORD`: テストユーザーのパスワード
+  - `AWS_REGION`: AWS リージョン
+
+**注意事項**：
+
+- CSR-05（古いシークレットの削除）はデフォルトでスキップされます（安全のため）
+- 削除を実行する場合は、`--delete-old-secret` オプションを指定してください：
+  ```bash
+  python3 tests/test_cognito_secret_rotation_e2e.py --delete-old-secret
+  ```
 
 ## ディレクトリ構造
 
 ```
-e2e-verification/
+examples/09-e2e-auth-test/
 ├── README.md                      # このファイル
 ├── requirements.txt               # Python 依存関係
 ├── run-e2e-verification.sh        # 一括実行スクリプト
+├── run_all_tests.sh               # 全テスト実行スクリプト
 ├── setup-infrastructure.sh        # インフラセットアップ
 ├── deploy-lambda-functions.sh     # Lambda デプロイ
-├── e2e-test.py                    # E2E テストスクリプト
+├── e2e-test.py                    # レガシーE2E テストスクリプト
 ├── cleanup.sh                     # リソース削除スクリプト
-└── .env                           # 環境変数（自動生成）
+├── .env                           # 環境変数（自動生成）
+└── tests/                         # モジュール化されたテストスイート
+    ├── test_inbound_auth.py                    # Inbound Auth 統合フロー
+    ├── test_outbound_auth_secrets_manager.py   # Outbound Auth - Secrets Manager
+    ├── test_memory_api_abac.py                 # Memory API ABAC
+    ├── test_dual_auth_independence.py          # Dual Auth 独立性
+    └── test_cognito_secret_rotation_e2e.py     # Cognito Secret Rotation（NEW）
 ```
 
 ## 環境変数（.env）
@@ -204,6 +271,58 @@ Failed: 0
 ==================================================
 ```
 
+### Cognito Secret Rotation テスト結果例
+
+```
+==================================================
+Cognito Client Secret Rotation E2E Test
+==================================================
+User Pool: us-east-1_XXXXXXXXX
+Client ID: xxxxxxxxxxxxxxxxxxxxxxxxxx
+Test User: test-user@example.com
+==================================================
+
+[CSR-01] 初期状態の確認
+------------------------------------------------------------
+[PASS] Current secrets count: 1
+       Secret IDs: ['xxxxx-xxxxx-xxxxx']
+
+[CSR-02] 新しいシークレットの追加
+------------------------------------------------------------
+[PASS] New secret added successfully
+       New Secret ID: yyyyy-yyyyy-yyyyy
+       Current secrets count: 2
+
+[CSR-03] デュアルシークレット状態での認証
+------------------------------------------------------------
+[PASS] Authentication with OLD secret: Success
+[PASS] Authentication with NEW secret: Success
+
+[CSR-04] 新しいシークレットでの RefreshToken フロー
+------------------------------------------------------------
+[PASS] RefreshToken flow with NEW secret: Success
+       New Access Token acquired
+
+[CSR-05] 古いシークレットの削除
+------------------------------------------------------------
+[SKIP] Secret deletion skipped for safety
+       Run with --delete-old-secret to execute deletion
+
+[CSR-06] ゼロダウンタイムローテーションの検証
+------------------------------------------------------------
+[PASS] Zero-downtime rotation validation: Success
+       Authentication continued seamlessly during rotation
+
+==================================================
+Test Summary
+==================================================
+Total:  6
+Passed: 5
+Skipped: 1
+Failed: 0
+==================================================
+```
+
 ## トラブルシューティング
 
 ### 1. AWS 認証情報エラー
@@ -266,6 +385,8 @@ export AWS_DEFAULT_REGION=us-east-1
 - [x] Request/Response Interceptor の基本動作
 - [x] DynamoDB テナント・共有テーブルの作成
 - [x] Pre Token Generation Lambda V2 の動作
+- [x] Cognito Client Secret Lifecycle Management（AddUserPoolClientSecret/DeleteUserPoolClientSecret API）
+- [x] デュアルシークレット状態での認証とゼロダウンタイムローテーション
 
 ### 現在の実装で検証できない項目（手動確認が必要）
 

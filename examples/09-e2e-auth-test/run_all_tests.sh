@@ -54,6 +54,7 @@ run_test "Memory API ABAC" "tests/test_memory_api_abac.py"
 echo ""
 echo "=== PHASE 2 - HIGH ==="
 run_test "Dual Auth Independence" "tests/test_dual_auth_independence.py"
+run_test "Cognito Client Secret Rotation E2E" "tests/test_cognito_secret_rotation_e2e.py"
 
 # Summary
 echo ""
