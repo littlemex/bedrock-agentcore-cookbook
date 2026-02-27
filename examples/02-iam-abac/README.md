@@ -186,6 +186,26 @@ namespace Condition Key を活用し、actorId を namespace パス内に埋め�
 | `bedrock-agentcore:namespace` | [OK] サポート済み | IAM レベルで正常に機能 |
 | `bedrock-agentcore:actorId` | [BLOCKED] 未サポート | API がコンテキスト値を提供しない |
 
+## API の種類と boto3 サービス名
+
+AWS Bedrock AgentCore には 2 つの API エンドポイントがあり、boto3 では異なるサービス名を使用します：
+
+### Control Plane API (`bedrock-agentcore-control`)
+
+Memory リソースや Gateway リソースなどの管理操作に使用します。
+
+- **使用スクリプト**: `setup-memory.py`, `test-memory-complete.py`, `test-write-operations-abac.py`, `test-namespace-security.py`
+- **主な操作**: `create_memory`, `get_memory`, `delete_memory`, `batch_create_memory_records`, `batch_delete_memory_records`
+
+### Data Plane API (`bedrock-agentcore`)
+
+Memory Records の CRUD 操作や Agent の実行に使用します。
+
+- **使用スクリプト**: `test-h1-condition-key.py`, `test-actorId-condition-key.py`
+- **主な操作**: `batch_create_memory_records`, `retrieve_memory_records`, `list_memory_records`
+
+**重要**: Data Plane API の `batch_create_memory_records` は、Control Plane API の同名メソッドとは**パラメータ構造が異なります**。Data Plane API では `requestIdentifier`, `namespaces`, `timestamp`, `memoryStrategyId` などの追加フィールドが必要です。
+
 ## 重要な発見事項
 
 当初、AWS 公式ドキュメントには `bedrock-agentcore:namespace` の記載がありませんでしたが、**実際には動作します**。この Condition Key は、マルチテナント環境でのアクセス制御に非常に有効です。

@@ -65,7 +65,18 @@ def create_trust_policy(account_id, tenant_id):
 
 
 def create_memory_abac_policy(memory_arn, tenant_id):
-    """Memory ABAC ポリシーを作成（Condition なしで全許可、namespace は application level で制御）"""
+    """
+    Memory API アクセスポリシーを作成
+
+    注意: このポリシーは基本的なリソースアクセス許可のみを提供します。
+    namespace Condition Key による ABAC 制御が必要な場合は、
+    test-write-operations-abac.py や test-namespace-security.py で
+    個別にロールを作成してください。
+
+    このポリシーの用途:
+    - 基本的な Memory API 操作のテスト
+    - STS SessionTags による ABAC のテスト（アプリケーションレベル制御）
+    """
     return {
         "Version": "2012-10-17",
         "Statement": [

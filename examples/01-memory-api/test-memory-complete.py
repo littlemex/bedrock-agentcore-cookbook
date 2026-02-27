@@ -228,12 +228,14 @@ def retrieve_memory_records(client, memory_id: str, namespace: str, query: str) 
         return None
 
 
-def delete_memory_record(client, memory_id: str, record_id: str) -> bool:
+def delete_memory_record(client, memory_id: str, record_id: str) -> tuple[bool, Optional[str]]:
     """
     Memory Record を削除する
 
     Returns:
-        削除成功時 True
+        (success: bool, error_code: Optional[str])
+        - 成功時: (True, None)
+        - 失敗時: (False, エラーコード)
     """
     logger.info(f"  Memory Record 削除中...")
     logger.info(f"    Memory ID: {memory_id}")
@@ -245,7 +247,7 @@ def delete_memory_record(client, memory_id: str, record_id: str) -> bool:
             recordId=record_id
         )
         logger.info("  [OK] Memory Record 削除成功")
-        return True
+        return True, None
 
     except ClientError as e:
         error_code = e.response["Error"]["Code"]
@@ -253,18 +255,20 @@ def delete_memory_record(client, memory_id: str, record_id: str) -> bool:
 
         if error_code == "AccessDeniedException":
             logger.info(f"  [EXPECTED] AccessDenied: {error_msg}")
-            return False
+            return False, error_code
         else:
             logger.error(f"  [ERROR] Memory Record 削除失敗: {error_code} - {error_msg}")
-            return False
+            return False, error_code
 
 
-def update_memory_record(client, memory_id: str, record_id: str, new_content: str) -> bool:
+def update_memory_record(client, memory_id: str, record_id: str, new_content: str) -> tuple[bool, Optional[str]]:
     """
     Memory Record を更新する
 
     Returns:
-        更新成功時 True
+        (success: bool, error_code: Optional[str])
+        - 成功時: (True, None)
+        - 失敗時: (False, エラーコード)
     """
     logger.info(f"  Memory Record 更新中...")
     logger.info(f"    Memory ID: {memory_id}")
@@ -282,7 +286,7 @@ def update_memory_record(client, memory_id: str, record_id: str, new_content: st
             ]
         )
         logger.info("  [OK] Memory Record 更新成功")
-        return True
+        return True, None
 
     except ClientError as e:
         error_code = e.response["Error"]["Code"]
@@ -290,10 +294,10 @@ def update_memory_record(client, memory_id: str, record_id: str, new_content: st
 
         if error_code == "AccessDeniedException":
             logger.info(f"  [EXPECTED] AccessDenied: {error_msg}")
-            return False
+            return False, error_code
         else:
             logger.error(f"  [ERROR] Memory Record 更新失敗: {error_code} - {error_msg}")
-            return False
+            return False, error_code
 
 
 def record_test(test_name: str, passed: bool, details: str = ""):
@@ -416,13 +420,13 @@ def test_3_cross_tenant_delete(tenant_a_client, tenant_b_client, memory_id: str,
     logger.info("=" * 80)
 
     logger.info("\n3-1. tenant-b で tenant-a の Record 削除を試行")
-    success = delete_memory_record(tenant_b_client, memory_id, record_id)
+    success, error_code = delete_memory_record(tenant_b_client, memory_id, record_id)
 
-    # tenant-b で削除が拒否されることを期待
+    # tenant-b で削除が AccessDeniedException で拒否されることを期待
     record_test(
         "3-1. Cross-Tenant Delete アクセス拒否",
-        not success,  # 失敗することが正しい
-        f"Expected: AccessDenied, Got: {'AccessDenied' if not success else 'Allowed'}"
+        not success and error_code == "AccessDeniedException",
+        f"Expected: AccessDeniedException, Got: {error_code if not success else 'Success'}"
     )
 
     logger.info("\n[結論] Cross-Tenant での Delete 操作は正しく拒否されました")
@@ -440,13 +444,13 @@ def test_4_cross_tenant_update(tenant_a_client, tenant_b_client, memory_id: str,
 
     logger.info("\n4-1. tenant-b で tenant-a の Record 更新を試行")
     new_content = "Modified by tenant-b (should be denied)"
-    success = update_memory_record(tenant_b_client, memory_id, record_id, new_content)
+    success, error_code = update_memory_record(tenant_b_client, memory_id, record_id, new_content)
 
-    # tenant-b で更新が拒否されることを期待
+    # tenant-b で更新が AccessDeniedException で拒否されることを期待
     record_test(
         "4-1. Cross-Tenant Update アクセス拒否",
-        not success,  # 失敗することが正しい
-        f"Expected: AccessDenied, Got: {'AccessDenied' if not success else 'Allowed'}"
+        not success and error_code == "AccessDeniedException",
+        f"Expected: AccessDeniedException, Got: {error_code if not success else 'Success'}"
     )
 
     logger.info("\n[結論] Cross-Tenant での Update 操作は正しく拒否されました")
@@ -463,12 +467,12 @@ def test_5_cleanup_tenant_a_delete(tenant_a_client, memory_id: str, record_id: s
     logger.info("=" * 80)
 
     logger.info("\n5-1. tenant-a で自分の Record 削除")
-    success = delete_memory_record(tenant_a_client, memory_id, record_id)
+    success, error_code = delete_memory_record(tenant_a_client, memory_id, record_id)
 
     record_test(
         "5-1. tenant-a で自 Record 削除",
         success,
-        "自テナントの Record は削除可能"
+        f"自テナントの Record は削除可能 (error_code: {error_code if error_code else 'None'})"
     )
 
     logger.info("\n[結論] tenant-a は自分の Record を正常に削除できました")
