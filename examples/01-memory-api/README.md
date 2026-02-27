@@ -10,19 +10,18 @@ Memory API を使用すると、エージェントの会話履歴やコンテキ
 
 - `setup-memory.py` - Memory の作成とセットアップ
 - `setup-memory-multi-tenant.py` - マルチテナント環境での Memory セットアップ
-- `test-memory-complete.py` - Memory API 完全検証スクリプト（NEW）
-- `cleanup.py` - 作成したリソースのクリーンアップ
+- `test-memory-complete.py` - Memory API 完全検証スクリプト- `cleanup.py` - 作成したリソースのクリーンアップ
 - `VERIFICATION_RESULT.md` - 検証結果レポート
 
 ## 前提条件
 
 - AWS CLI 設定済み（`aws configure`）
 - AWS アカウントに以下の権限
-  - `bedrock-agentcore: CreateMemory`
-  - `bedrock-agentcore: GetMemory`
-  - `bedrock-agentcore: DeleteMemory`
-  - `iam: CreateRole`
-  - `iam: AttachRolePolicy`
+  - `bedrock-agentcore:CreateMemory`
+  - `bedrock-agentcore:GetMemory`
+  - `bedrock-agentcore:DeleteMemory`
+  - `iam:CreateRole`
+  - `iam:AttachRolePolicy`
 
 ## セットアップ
 
@@ -48,8 +47,7 @@ python setup-memory.py
 python setup-memory-multi-tenant.py
 ```
 
-4. Memory API 完全検証の実行（NEW）
-
+4. Memory API 完全検証の実行
 ```bash
 python test-memory-complete.py
 ```

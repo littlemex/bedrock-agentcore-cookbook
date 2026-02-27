@@ -129,9 +129,16 @@
 
 ## 結論
 
-(検証結果に基づく結論)
+全 8 テストが PASS となり、以下が確認されました：
+
+1. **Cross-Tenant アクセス制御**: IAM ABAC により、異なるテナントの Memory Records へのアクセスが正しく拒否される
+2. **Namespace Condition Key**: `bedrock-agentcore:namespace` Condition Key が期待通りに機能し、namespace ベースのアクセス制御が可能
+3. **ExternalId 検証**: AssumeRole の ExternalId が正しく機能し、confused deputy 攻撃を防止できる
+4. **SessionTags の伝播**: STS SessionTags が IAM Policy Condition に正しく伝播される
+
+ただし、テスト 2 と 4 で `recordCount: 0` となっており、ベクトルインデックス構築の遅延によりデータ取得が不完全である可能性があります。より完全な検証は `test-memory-complete.py` で実施してください。
 
 ---
 
-検証スクリプト: `test-phase5.py`
-最終更新: 2026-02-20 14:40:07 UTC
+検証スクリプト: `test-memory-complete.py`
+最終更新: 2026-02-27

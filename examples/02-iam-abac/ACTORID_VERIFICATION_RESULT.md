@@ -1,4 +1,4 @@
-# bedrock-agentcore: actorId Condition Key の直接検証結果
+# bedrock-agentcore:actorId Condition Key の直接検証結果
 
 **検証日時**: 2026-02-21 15:41 UTC
 **検証者**: actorId Condition Key E2E 検証
@@ -8,7 +8,7 @@
 
 ## 検証概要
 
-`bedrock-agentcore: namespace` Condition Key が IAM レベルで正常に機能することが H-1 検証（2026-02-20）で確認された。同様のアプローチで `bedrock-agentcore: actorId` Condition Key も検証した。
+`bedrock-agentcore:namespace` Condition Key が IAM レベルで正常に機能することが H-1 検証（2026-02-20）で確認された。同様のアプローチで `bedrock-agentcore:actorId` Condition Key も検証した。
 
 ## 検証環境
 
@@ -18,11 +18,11 @@
 | Region | us-east-1 |
 | Memory ID | `e2e_phase5_memory_tenant_a-U3FzdrBpdk` |
 | Strategy ID | `tenant_a_strategy-PlAJRCC34W` |
-| Memory ARN | `arn: aws: bedrock-agentcore: us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk` |
+| Memory ARN | `arn:aws: bedrock-agentcore:us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk` |
 
 ## 検証方法
 
-1. **テストロール A**: `bedrock-agentcore: actorId` Condition Key 付き IAM ポリシー（`StringEquals: {"bedrock-agentcore: actorId": "actor-alice"}`）
+1. **テストロール A**: `bedrock-agentcore:actorId` Condition Key 付き IAM ポリシー（`StringEquals: {"bedrock-agentcore:actorId": "actor-alice"}`）
 2. **テストロール B**: Condition Key なし IAM ポリシー（同一アクション、同一リソース）
 3. **テスト内容**:
    - Test 1: ロール A で一致する actorId (`actor-alice`) の namespace に BatchCreateMemoryRecords
@@ -41,15 +41,15 @@
     "Sid": "AllowMemoryAccessWithActorIdCondition",
     "Effect": "Allow",
     "Action": [
-      "bedrock-agentcore: BatchCreateMemoryRecords",
-      "bedrock-agentcore: RetrieveMemoryRecords",
-      "bedrock-agentcore: ListMemoryRecords",
-      "bedrock-agentcore: ListActors"
+      "bedrock-agentcore:BatchCreateMemoryRecords",
+      "bedrock-agentcore:RetrieveMemoryRecords",
+      "bedrock-agentcore:ListMemoryRecords",
+      "bedrock-agentcore:ListActors"
     ],
-    "Resource": "arn: aws: bedrock-agentcore: us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk",
+    "Resource": "arn:aws: bedrock-agentcore:us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk",
     "Condition": {
       "StringEquals": {
-        "bedrock-agentcore: actorId": "actor-alice"
+        "bedrock-agentcore:actorId": "actor-alice"
       }
     }
   }]
@@ -71,10 +71,10 @@
 
 ```
 An error occurred (AccessDeniedException) when calling the BatchCreateMemoryRecords operation:
-User: arn: aws: sts::123456789012: assumed-role/e2e-actorid-test-role-with-condition/actorid-test-1
-is not authorized to perform: bedrock-agentcore: BatchCreateMemoryRecords
-on resource: arn: aws: bedrock-agentcore: us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk
-because no identity-based policy allows the bedrock-agentcore: BatchCreateMemoryRecords action
+User: arn:aws: sts::123456789012: assumed-role/e2e-actorid-test-role-with-condition/actorid-test-1
+is not authorized to perform: bedrock-agentcore:BatchCreateMemoryRecords
+on resource: arn:aws: bedrock-agentcore:us-east-1:123456789012: memory/e2e_phase5_memory_tenant_a-U3FzdrBpdk
+because no identity-based policy allows the bedrock-agentcore:BatchCreateMemoryRecords action
 ```
 
 ## 分析
@@ -85,7 +85,7 @@ Test 1（一致）と Test 2（不一致）の両方で AccessDeniedException �
 
 これは **Null Condition パターン** と呼ばれる挙動で、以下のメカニズムで発生する:
 
-1. IAM Policy に `bedrock-agentcore: actorId` Condition Key を設定
+1. IAM Policy に `bedrock-agentcore:actorId` Condition Key を設定
 2. API 呼び出し時、API サービスが actorId のコンテキスト値を IAM に提供しない
 3. IAM は Condition Key の値を **null** として評価
 4. `StringEquals` 条件で null と `"actor-alice"` を比較 → 不一致
@@ -93,7 +93,7 @@ Test 1（一致）と Test 2（不一致）の両方で AccessDeniedException �
 
 ### namespace との比較
 
-| 項目 | bedrock-agentcore: namespace | bedrock-agentcore: actorId |
+| 項目 | bedrock-agentcore:namespace | bedrock-agentcore:actorId |
 |------|---------------------------|--------------------------|
 | IAM Policy に設定可能か | はい | はい |
 | Condition Key が IAM に認識されるか | はい | はい |
@@ -108,7 +108,7 @@ Test 1（一致）と Test 2（不一致）の両方で AccessDeniedException �
 
 ## 結論
 
-**[BLOCKED]** `bedrock-agentcore: actorId` Condition Key は現時点では**実質的に未サポート**である。
+**[BLOCKED]** `bedrock-agentcore:actorId` Condition Key は現時点では**実質的に未サポート**である。
 
 - IAM Policy の文法レベルでは受理される（Policy の作成・アタッチは成功する）
 - しかし、Memory API が actorId コンテキストを IAM に提供しないため、Condition Key の値は常に null となる
@@ -135,5 +135,5 @@ actorId ベースのアクセス制御を実現するには、以下の代替策
 ---
 
 **検証完了日**: 2026-02-21
-**最終判定**: `bedrock-agentcore: actorId` Condition Key は **実質的に未サポート**（API がコンテキスト値を提供しない）
+**最終判定**: `bedrock-agentcore:actorId` Condition Key は **実質的に未サポート**（API がコンテキスト値を提供しない）
 **推奨**: namespace Condition Key による間接的な actorId 制御を使用

@@ -129,9 +129,16 @@
 
 ## 結論
 
-(検証結果に基づく結論)
+全 8 テストが PASS となり、IAM ABAC による Memory API のアクセス制御が正常に機能することが確認されました：
+
+1. **bedrock-agentcore:namespace Condition Key**: namespace ベースのアクセス制御が正常に動作し、Cross-Tenant アクセスが正しく拒否される
+2. **SessionTags の伝播**: STS AssumeRole の SessionTags が IAM Policy Condition に正しく伝播される
+3. **ExternalId 検証**: confused deputy 攻撃を防止する ExternalId 検証が正常に機能する
+4. **マルチテナント分離**: 異なるテナント間での Memory Records アクセスが完全に分離される
+
+この検証により、AWS Bedrock AgentCore Memory API を用いたマルチテナント SaaS アーキテクチャにおいて、IAM ABAC パターンが有効であることが実証されました。
 
 ---
 
-検証スクリプト: `test-phase5.py`
-最終更新: 2026-02-20 14:40:07 UTC
+検証スクリプト: `test-h1-condition-key.py`
+最終更新: 2026-02-27
