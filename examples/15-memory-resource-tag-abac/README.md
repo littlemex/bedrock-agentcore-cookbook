@@ -4,6 +4,65 @@
 
 この Example では、Memory API に対する `aws:ResourceTag/tenant_id` Condition Key の動作を検証します。
 
+## 前提条件
+
+### 必須 IAM 権限
+
+この Example を実行するには、以下の IAM 権限が**必須**です：
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RequiredForABACTesting",
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Resource": "arn:aws:iam::*:role/memory-abac-*"
+    },
+    {
+      "Sid": "RequiredForMemoryOperations",
+      "Effect": "Allow",
+      "Action": [
+        "bedrock-agentcore:CreateMemory",
+        "bedrock-agentcore:GetMemory",
+        "bedrock-agentcore:DeleteMemory",
+        "bedrock-agentcore:PutMemoryRecord",
+        "bedrock-agentcore:RetrieveMemoryRecords",
+        "bedrock-agentcore:TagResource",
+        "bedrock-agentcore:UntagResource",
+        "bedrock-agentcore:ListTagsForResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "RequiredForIAMRoleManagement",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::*:role/memory-abac-*"
+    }
+  ]
+}
+```
+
+**特に重要**: `sts:TagSession` 権限がない場合、以下のエラーが発生します：
+
+```
+botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the AssumeRole operation:
+User: ... is not authorized to perform: sts:TagSession on resource: ...
+```
+
+このエラーが発生した場合は、[../../TROUBLESHOOTING.md](../../TROUBLESHOOTING.md#1-ststagsession-権限不足-critical) を参照してください。
+
 ## 概要
 
 マルチテナント環境において、Memory リソースへのアクセス制御を `aws:ResourceTag` で実現するパターンを検証します。

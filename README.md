@@ -341,6 +341,56 @@ client = boto3.client('bedrock-agentcore-control', region_name='us-east-1')
 
 **解決策**: アンダースコアを使用してください（例: `my_policy_engine`）
 
+### Error: AccessDenied when calling AssumeRole (sts:TagSession)
+
+**原因**: 現在の IAM ロールに `sts:TagSession` 権限がない
+
+このエラーは以下の examples で発生します：
+- examples/02-iam-abac
+- examples/11-s3-abac
+- examples/15-memory-resource-tag-abac
+
+**エラーメッセージ例**:
+```
+botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the AssumeRole operation:
+User: arn:aws:sts::ACCOUNT_ID:assumed-role/ROLE_NAME/SESSION_NAME is not authorized to perform:
+sts:TagSession on resource: arn:aws:iam::ACCOUNT_ID:role/TARGET_ROLE_NAME
+```
+
+**解決策 1: IAM 権限を追加**（推奨）
+
+現在の IAM ロール/ユーザーに以下のポリシーを追加してください：
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Resource": [
+        "arn:aws:iam::ACCOUNT_ID:role/*-abac-*",
+        "arn:aws:iam::ACCOUNT_ID:role/s3-abac-*",
+        "arn:aws:iam::ACCOUNT_ID:role/memory-abac-*"
+      ]
+    }
+  ]
+}
+```
+
+**解決策 2: 代替テスト方法**
+
+セッションタグなしでテストする場合は、各 example の Python スクリプトで `Tags` パラメータをコメントアウトしてください。ただし、この場合 ABAC（Attribute-Based Access Control）の検証はできません。
+
+**解決策 3: 十分な権限を持つ環境で実行**
+
+AWS Administrator Access または同等の権限を持つ IAM ユーザー/ロールで実行してください。
+
+詳細は [TROUBLESHOOTING.md](TROUBLESHOOTING.md) を参照してください。
+
 ## クリーンアップ
 
 各例には `cleanup.py` スクリプトが含まれています。作成したリソースを削除するには：

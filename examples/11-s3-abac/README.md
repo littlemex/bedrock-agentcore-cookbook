@@ -4,6 +4,68 @@
 
 この Example では、S3 オブジェクトタグと STS セッションタグを使用した ABAC パターンを実装します。
 
+## 前提条件
+
+### 必須 IAM 権限
+
+この Example を実行するには、以下の IAM 権限が**必須**です：
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RequiredForABACTesting",
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Resource": "arn:aws:iam::*:role/s3-abac-*"
+    },
+    {
+      "Sid": "RequiredForS3Operations",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:ListBucket",
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:PutObjectTagging",
+        "s3:GetObjectTagging"
+      ],
+      "Resource": [
+        "arn:aws:s3:::s3-abac-example-*",
+        "arn:aws:s3:::s3-abac-example-*/*"
+      ]
+    },
+    {
+      "Sid": "RequiredForIAMRoleManagement",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:DeleteRole",
+        "iam:GetRole",
+        "iam:PutRolePolicy",
+        "iam:DeleteRolePolicy"
+      ],
+      "Resource": "arn:aws:iam::*:role/s3-abac-*"
+    }
+  ]
+}
+```
+
+**特に重要**: `sts:TagSession` 権限がない場合、以下のエラーが発生します：
+
+```
+botocore.exceptions.ClientError: An error occurred (AccessDenied) when calling the AssumeRole operation:
+User: ... is not authorized to perform: sts:TagSession on resource: ...
+```
+
+このエラーが発生した場合は、[../../TROUBLESHOOTING.md](../../TROUBLESHOOTING.md#1-ststagsession-権限不足-critical) を参照してください。
+
 ## 概要
 
 マルチテナント環境において、S3 オブジェクトへのアクセス制御を実現する方法を示します。
