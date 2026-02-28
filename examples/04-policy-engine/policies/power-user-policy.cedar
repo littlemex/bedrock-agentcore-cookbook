@@ -9,7 +9,7 @@ permit (
     AgentCore::Action::"mcp-target___list_directory",
     AgentCore::Action::"mcp-target___brave_web_search"
   ],
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:776010787911:gateway/e2e-phase3-gateway-sytqnigmll"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/e2e-phase3-gateway-sytqnigmll"
 )
 when {
   principal.hasTag("role") &&
@@ -23,7 +23,7 @@ forbid (
   action in [
     AgentCore::Action::"mcp-target___delete_file"
   ],
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:776010787911:gateway/e2e-phase3-gateway-sytqnigmll"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/e2e-phase3-gateway-sytqnigmll"
 )
 when {
   principal.hasTag("role") &&

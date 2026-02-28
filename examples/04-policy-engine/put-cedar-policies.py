@@ -152,6 +152,18 @@ def load_policy_files(policy_dir: str) -> list[dict]:
         logger.error("ポリシーディレクトリが見つかりません: %s", policy_dir)
         sys.exit(1)
 
+    # 環境変数からアカウント ID を取得
+    account_id = os.environ.get("AWS_ACCOUNT_ID") or os.environ.get("ACCOUNT_ID")
+    if not account_id:
+        # boto3 から現在のアカウント ID を取得
+        try:
+            sts_client = boto3.client("sts")
+            account_id = sts_client.get_caller_identity()["Account"]
+            logger.info("現在のアカウント ID: %s", account_id)
+        except Exception as e:
+            logger.warning("アカウント ID の自動取得に失敗: %s", e)
+            account_id = None
+
     for filename in sorted(os.listdir(policy_dir)):
         if not filename.endswith(".cedar"):
             continue
@@ -161,6 +173,11 @@ def load_policy_files(policy_dir: str) -> list[dict]:
 
         with open(filepath) as f:
             content = f.read()
+
+        # 環境変数の置換
+        if account_id and "${ACCOUNT_ID}" in content:
+            logger.info("ポリシー '%s' で ${ACCOUNT_ID} を %s に置換", filename, account_id)
+            content = content.replace("${ACCOUNT_ID}", account_id)
 
         policies.append({
             "name": policy_name,

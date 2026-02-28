@@ -253,11 +253,6 @@ def benchmark_dynamodb_throughput(
         effective_batch = batch_emails[:min(batch_size, 100)]
 
         for i in range(total_iterations):
-            latency, success, count = measure_batch_get(
-                boto3.client("dynamodb", region_name=region).__class__,
-                table_name,
-                effective_batch,
-            )
             # BatchGetItem は boto3.resource 経由で呼ぶ
             start = time.perf_counter()
             try:

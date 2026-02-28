@@ -73,6 +73,11 @@ python put-cedar-policies.py
 
 `policies/` ディレクトリ内のすべての `.cedar` ファイルが Policy Engine に登録されます。
 
+**環境変数の置換:**
+- Cedar ポリシーファイル内の `${ACCOUNT_ID}` は自動的に現在の AWS アカウント ID に置換されます
+- 環境変数 `AWS_ACCOUNT_ID` または `ACCOUNT_ID` を設定することで明示的に指定できます
+- 未設定の場合、`sts:GetCallerIdentity` から自動取得されます
+
 5. Cognito テストユーザーの作成
 
 ```bash

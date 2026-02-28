@@ -368,7 +368,7 @@ def main():
         session = assume_gdpr_processor_role(config)
 
     # Memory API クライアント作成
-    client = session.client("bedrock-agentcore-runtime", region_name=REGION)
+    client = session.client("bedrock-agentcore", region_name=REGION)
 
     # Step 1: 対象ユーザーの記憶を取得
     print(f"\n[STEP 1] Retrieving memories for: {args.actor_id}")

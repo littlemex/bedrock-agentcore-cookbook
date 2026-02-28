@@ -8,7 +8,7 @@ permit (
     AgentCore::Action::"mcp-target___store_memory",
     AgentCore::Action::"mcp-target___delete_memory"
   ],
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:123456789012:gateway/gw-001"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/gw-001"
 )
 when {
   principal.hasTag("role") &&
@@ -19,7 +19,7 @@ when {
 permit (
   principal is AgentCore::OAuthUser,
   action == AgentCore::Action::"mcp-target___search_memory",
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:123456789012:gateway/gw-001"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/gw-001"
 )
 when {
   principal.hasTag("role") &&
@@ -33,7 +33,7 @@ permit (
     AgentCore::Action::"mcp-target___search_memory",
     AgentCore::Action::"mcp-target___store_memory"
   ],
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:123456789012:gateway/gw-001"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/gw-001"
 )
 when {
   principal.hasTag("tenant_id") &&

@@ -7,7 +7,7 @@ permit (
     AgentCore::Action::"mcp-target___retrieve_doc",
     AgentCore::Action::"mcp-target___list_tools"
   ],
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:123456789012:gateway/e2e-phase3-gateway-sytqnigmll"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/e2e-phase3-gateway-sytqnigmll"
 )
 when {
   principal.hasTag("role") &&

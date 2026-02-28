@@ -4,7 +4,7 @@
 permit (
   principal is AgentCore::OAuthUser,
   action,
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:123456789012:gateway/gw-001"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/gw-001"
 )
 when {
   principal.hasTag("tenant_id") &&
@@ -17,7 +17,7 @@ when {
 permit (
   principal is AgentCore::OAuthUser,
   action == AgentCore::Action::"rag-server___retrieve_doc",
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:123456789012:gateway/gw-001"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/gw-001"
 )
 when {
   principal.hasTag("tenant_id") &&
@@ -30,7 +30,7 @@ when {
 forbid (
   principal is AgentCore::OAuthUser,
   action,
-  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:123456789012:gateway/gw-001"
+  resource == AgentCore::Gateway::"arn:aws:bedrock-agentcore:us-east-1:${ACCOUNT_ID}:gateway/gw-001"
 )
 when {
   !(principal.hasTag("tenant_id")) ||

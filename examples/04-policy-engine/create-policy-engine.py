@@ -163,7 +163,7 @@ def attach_policy_engine_to_gateway(
     try:
         # 方法 1: attach_policy_engine API
         bedrock_client.attach_policy_engine(
-            gatewayId=gateway_id,
+            gatewayIdentifier=gateway_id,
             policyEngineId=policy_engine_id,
         )
         logger.info("[OK] Policy Engine を Gateway に関連付けました。")
@@ -174,7 +174,7 @@ def attach_policy_engine_to_gateway(
     try:
         # 方法 2: update_gateway API で Policy Engine を設定
         bedrock_client.update_gateway(
-            gatewayId=gateway_id,
+            gatewayIdentifier=gateway_id,
             policyEngineConfiguration={
                 "policyEngineId": policy_engine_id,
             },
